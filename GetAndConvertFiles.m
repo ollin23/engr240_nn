@@ -1,7 +1,6 @@
 clear;
 clc;
-% % SECTION I: RETRIEVE AND DECOMPRESS DATA FROM INTERNET
-% % online locations for binary data files
+% SECTION I: RETRIEVE AND DECOMPRESS DATA FROM INTERNET
 fprintf(['This program downloads the MNIST data and saves\n',...
          'it as a csv. If you already have the MNIST files,\n',...
          'please store them in the current directory under\n',...
@@ -18,14 +17,16 @@ else
 
     disp('Downloading MNIST data...');
     
+    % online locations for binary data files
     fileArray = {
      'http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz';
      'http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz';
      'http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz';
      'http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz'};
     
-    %unzip binary data file into \project subfolder in the current directory
-     folder = [pwd '\project'];
+    % location for binary data files is \project subfolder in the current
+    % directory
+    folder = [pwd '\project'];
     endFiles = {'train_images';
                 'train_labels';
                 'test_images';
@@ -40,7 +41,7 @@ else
          movefile(temp, endPoint);
         
         % open binary files. the metadata is uint32; the image and label data 
-        % is uint8 
+        % are uint8 
         file = fopen(endPoint,'r','b');
         filemeta{i} = fread(file,'uint32');
         fclose(file);
@@ -61,9 +62,9 @@ else
     end
     
     % SECTION II: PARSE DATA INTO DATA FILES
-    
     disp('Parsing data...');
     pause(.5);
+    
     % save files as csv
     train_data = [];
     test_data = [];
@@ -121,7 +122,8 @@ else
     training = [folder '\train_data.csv'];
     testing = [folder '\test_data.csv'];
     
-    % determine the version of MATLAB
+    % determine the version of MATLAB. different versions do not use the
+    % same function to save csv files
     v = ver;
     for k = 1:length(v)
         if strcmp(v(k).Name,'MATLAB')
