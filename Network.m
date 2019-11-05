@@ -4,14 +4,13 @@ classdef Network
         % parameters
         weights = {};
         memory = {};
-        errors = {};
+        errors = [];
         bias = {};
-        targetMatrix = [];
                
         % hyperparameters
-        epochs;
-        eta;
-        batches;
+        epochs;  % number of cycles through the training data
+        eta; % learning rate
+        batches; % number of batches for mini-batch training
     end
     methods
         % constructor 
@@ -26,7 +25,6 @@ classdef Network
             net.weights = w;
             net.bias = b;
             net.errors = e;
-            net.targetMatrix = eye(layers(end));
             
             % hyperparameters
             net.epochs = 1000;
@@ -50,12 +48,15 @@ classdef Network
         end
         
         % cost function
-        function [c] = cost(prediction, actual, targetMatrix)
+        function [c] = cost(func, prediction, targets)
+            c = cost(func, prediction, targets);
         end
         
-        % update the weights
-        function errors = update()
+        % find the deltas for the weights
+        function deltas = getDeltas()
         end
+        
+        
     end
     
 end
