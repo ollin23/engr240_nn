@@ -1,3 +1,4 @@
+
 % This is the main script file for the project
 clear; clc;
 % clear layers nodes outputCount response counter;
@@ -13,8 +14,7 @@ data = load(datadir);
 % get size of output vector
 [sampleCount, imgSize] = size(images);
 nodes = imgSize;
-targets = unique(labels);
-outputCount = length(targets);
+outputCount = length(unique(labels));
 
 
 %determine default count of nodes in layer and number of layers
@@ -48,6 +48,13 @@ displayNetworkDesign(layers);
 disp('<< Press Enter to continue...>>');
 pause();
 
-for i = 1:sampleCount
-    
-end
+% encode the labels
+encodedLabels = oneHotEncoding(labels);
+
+% choose to adjust parameters
+%epochs, batches, transfer function, output activation function
+nn.epochs = 250;
+nn.batches = 100;
+nn.transfer = 'tanh';
+
+nn.trainNetwork(nn.epochs, images, encodedLabels);
