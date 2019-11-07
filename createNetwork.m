@@ -1,4 +1,4 @@
-function [weights, bias, error] = createNetwork(layers)
+function [weights, bias] = createNetwork(layers)
 %createNetwork produces a fully connected a neural net
 %
 % weights : the network 
@@ -16,8 +16,5 @@ for i = 1:(length(layers)-1)
     weights{1,i} = randn([layers(i+1) layers(i)]) *.5;
     bias(i) = 1;
 end
-
-% create error layer; this layer will be the initial input for backprop
-error = ones(layers(end), layers(end));
 
 end
