@@ -5,14 +5,13 @@ function [encoded] = oneHotEncoding(labelList)
 % in a series of zeros the length of the number of unique labels.
 %
 % Example -
-% list := unique(labels) = [1 2 3 4 2 1]
+% labels = [1 2 3 4 2 1]
+% list := unique(labels) = [1 2 3 4]
 % oneHotEncoding(list) => 
 %       encodedLabels = [[1 0 0 0]
 %                        [0 1 0 0]
 %                        [0 0 1 0]
-%                        [0 0 0 1]
-%                        [0 1 0 0]
-%                        [1 0 0 0]]
+%                        [0 0 0 1]]
 
 % get the unique labels
 targets = unique(labelList);
