@@ -26,7 +26,7 @@ switch func
         J = max(0, 1-prediction .* actual);
     case 'KL'
         J = sum(prediction .* log(prediction ./ actual));
-    otherwise % default is MSE
+    case 'MSE'
         J = (sum(prediction - actual).^2) / n;
 end
 
