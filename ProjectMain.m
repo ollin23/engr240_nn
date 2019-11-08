@@ -1,8 +1,9 @@
-
 % This is the main script file for the project
 clear; clc;
+
 % clear layers nodes outputCount response counter;
 format compact;
+
 % % actual data
 % data = load('train_data.csv');
 datadir = [pwd '\project\test_samples.csv'];
@@ -10,6 +11,9 @@ data = load(datadir);
  
 % split data file into images and labels
 [labels, images] = samples(data);
+
+%normalize image data
+images = images / 255;
 
 % get size of output vector
 [sampleCount, imgSize] = size(images);
@@ -49,12 +53,16 @@ disp('<< Press Enter to continue...>>');
 pause();
 
 % encode the labels
-encodedLabels = oneHotEncoding(labels);
+% Add network metric parameters
+nn.encodedLabels = oneHotEncoding(labels);
+nn.images = images;
+nn.labels = labels;
 
-% choose to adjust parameters
-%epochs, batches, transfer function, output activation function
-nn.epochs = 250;
+% Adjust Network parameters
+% epochs, batches, transfer function
+nn.epochs = 1000;
 nn.batches = 100;
 nn.transfer = 'tanh';
 
-nn.trainNetwork(nn.epochs, images, encodedLabels);
+
+fit(nn);
