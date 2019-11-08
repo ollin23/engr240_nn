@@ -1,5 +1,6 @@
-function [] = backprop(batchEncodedLabels, prediction, batch, nn)
+function backprop(input, batchEncodedLabels, prediction, batch, self)
 %backprop executes the backpropagation algorithm on the network
+%
 %PARAMETERS
 % layers - number of layers for the algorithm to propagate through
 % batchEncodedLabels - the target labels for the current batch
@@ -8,23 +9,38 @@ function [] = backprop(batchEncodedLabels, prediction, batch, nn)
 % nn - the neural network
 %
     b = batch;
-    layers = length(nn.weights);
+    layers = length(self.weights);
+    
     % move backwards through the layers
     for i = layers:-1:1
+        
+        % Backprop for final output layer
         if i == layers
-            func = nn.lastLayer;
-            dJ = sum(batchEncodedLabels - prediction);
+            %func = nn.lastLayer;
+            delta = sum(batchEncodedLabels - prediction);
+            prior = self.memory{b,i};
+            gradient  = prior * delta';
+            
+        % Backprop for non-final layers
         else
-            func = nn.transfer;
-            dJ = nn.weights{i+1};
+            func = self.transfer;
+            
+            if (i-1) == 0
+                h = input;
+            else
+                h = [self.memory{:,i}];
+                h = sum(reshape(h,b,length(self.memory{b,i})));
+            end
+            oldWeights = self.weights{i};
+            delta = mean(activate(h,func,true));            
+            gradient = delta * oldWeights';
         end
-        h = nn.memory{b,i};
-        da = activate(h,func,true);
-        deltaWeights = (dJ .* da) * nn.memory{b,i}';
-        deltaBias = (dJ .* da) * nn.bias(i);
+        %deltaWeights = (dJ .* da) * nn.memory{b,i}';
+        nablaBias = gradient .* self.bias(i);
         
         % update weights and bias
-        nn.weights{i} = nn.weights{i} - nn.eta * sum(deltaWeights)';
-        nn.bias(i) = nn.bias(i) - nn.eta * sum(mean(deltaBias));
+        self.weights{i} = self.weights{i} + self.eta * gradient';
+        self.bias(i) = self.bias(i) - self.eta * sum(mean(nablaBias));
+
     end
 end
