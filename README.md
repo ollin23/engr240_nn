@@ -1,14 +1,12 @@
 # engr240_nn
 MATLAB based MLP
 This is the project for my Engineering Applications class for Fall 2019.
-Last update: 7 Nov 2019
+Last update: 8 Nov 2019
 
 NOTES:
-- need to add error history to show changes to weights
-- need to add graph function for aforementioned
-- relu generates NaN costs during backprop
-- persistent error in Network/trainNetwork:  Too many input arguments.
-
+- fixed relu errors; still potentially unstable
+- fixed error history storage
+- added graph of errors
 
 Functions:
 - activate: activation functions
@@ -17,6 +15,7 @@ Functions:
 - createNetwork: initializes the neural net
 - displayNetworkDesign: allows user to numerically see how the network is designed
 - feedforward: simple feedforward process(weights * input + data)
+- fit: wrapper function for training data; implements epoch cycles and graph
 - menu: menu to drive topology design
 - samples: splits the csv into label and image structures; shows user a sample of the images
 - sigmoid: sigmoid function
