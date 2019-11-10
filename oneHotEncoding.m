@@ -1,17 +1,21 @@
 function [encoded] = oneHotEncoding(labelList)
 % oneHotEncoding encodes the target labels using one hot encoding schema
 %
-% For every label in the label set, each unique label is encoded as a one
-% in a series of zeros the length of the number of unique labels.
+% encoded = oneHotEncoding(labelList)
+% For every label in a vector, labelList, each unique label is encoded
+% as a one in a series of zeros the length of the number of unique labels.
+% The return variable is a vector of corresponding encoded labels from the
+% given list.
 %
 % Example -
-% labels = [1 2 3 4 2 1]
-% list := unique(labels) = [1 2 3 4]
-% oneHotEncoding(list) => 
+% list = [1 2 3 4 2 1];
+% encodedLabels = oneHotEncoding(list)
 %       encodedLabels = [[1 0 0 0]
 %                        [0 1 0 0]
 %                        [0 0 1 0]
-%                        [0 0 0 1]]
+%                        [0 0 0 1]
+%                        [0 1 0 0]
+%                        [1 0 0 0]]
 
 % get the unique labels
 targets = unique(labelList);
