@@ -1,6 +1,10 @@
 clear;
 clc;
+%* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 % SECTION I: RETRIEVE AND DECOMPRESS DATA FROM INTERNET
+%* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+% online locations for binary data files
 fprintf(['This program downloads the MNIST data and saves\n',...
          'it as a csv. If you already have the MNIST files,\n',...
          'please store them in the current directory under\n',...
@@ -9,24 +13,17 @@ answer = input('Download and save MNIST data? (y/N)  ','s');
 answer = lower(answer);
 
 if strcmp(answer,'y')
-    
-    fprintf(['* * * * * * * * * *\n',...
-             'Use "ProjectMain.m" to begin the program.\n\n']);
-    pause();
-else
 
     disp('Downloading MNIST data...');
     
-    % online locations for binary data files
     fileArray = {
      'http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz';
      'http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz';
      'http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz';
      'http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz'};
     
-    % location for binary data files is \project subfolder in the current
-    % directory
-    folder = [pwd '\project'];
+    %unzip binary data file into \project subfolder in the current directory
+     folder = [pwd '\project'];
     endFiles = {'train_images';
                 'train_labels';
                 'test_images';
@@ -41,7 +38,7 @@ else
          movefile(temp, endPoint);
         
         % open binary files. the metadata is uint32; the image and label data 
-        % are uint8 
+        % is uint8 
         file = fopen(endPoint,'r','b');
         filemeta{i} = fread(file,'uint32');
         fclose(file);
@@ -61,10 +58,11 @@ else
         end
     end
     
-    % SECTION II: PARSE DATA INTO DATA FILES
+%* * * * * * * * * * * * * * * * * * * * * * *
+%   SECTION II: PARSE DATA INTO DATA FILES
+%* * * * * * * * * * * * * * * * * * * * * * *
     disp('Parsing data...');
     pause(.5);
-    
     % save files as csv
     train_data = [];
     test_data = [];
@@ -88,7 +86,7 @@ else
                         '   Test data   \n'...
                         '* * * * * * * *\n']);            
             end
-            fprintf('Percent complete:   0.0%%');
+            fprintf('Percent complete:     ');
             headers = [datafiles{i+1}];
             for r = 1:rows
                 outfile(r,:) = [datafiles{i}(first:last)];
@@ -96,7 +94,7 @@ else
                 last = last + sz;
                 
                 % keep track of percentage done
-                percent = 100 * r/rows;
+                percent = 100 * (r/rows);
                 strPer = [num2str(percent) '%%'];
                 if percent < 100
                     strCR = [repmat('\b',1,length(strPer)-1)];
@@ -122,13 +120,12 @@ else
     training = [folder '\train_data.csv'];
     testing = [folder '\test_data.csv'];
     
-    % determine the version of MATLAB. different versions do not use the
-    % same function to save csv files
+    % determine the version of MATLAB
     v = ver;
     for k = 1:length(v)
         if strcmp(v(k).Name,'MATLAB')
-            version = str2num(v(k).Version);
-            break
+            version = str2double(v(k).Version);
+            break;
         end
     end
     
@@ -149,4 +146,9 @@ else
     fprintf(['\n* * * * * * * * * * * \n',...
              'Conversion of MNIST binary to csv complete.\n',...
              'Use "ProjectMain.m" to begin the program.\n\n']);
+else         
+    fprintf(['* * * * * * * * * *\n',...
+             'Use "ProjectMain.m" to begin the program.\n',...
+             ' << Press any button to continue >>\n']);
+    pause();         
 end
