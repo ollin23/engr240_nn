@@ -10,6 +10,8 @@ function a = activate(h, func, derivative)
 % VALUES:
 %  - relu: Rectified Linear Unit (also known as ReLU). Returns the max of
 %       the input linear function or zero.
+%  - leaky: Leaky ReLU. if h > 0, returns linear function. if h < 0,
+%       returns the h * .01
 %  - tanh: hyperbolic tangent. Transforms h to the range of (-1,1)
 %  - softmax: softmax function (see softmax notes). Used primarily for the
 %       output layer
@@ -23,16 +25,26 @@ function a = activate(h, func, derivative)
 % VALUES:
 %  - true: used for backpropagation
 %  - false: used for feedforward
+%
+% OUTPUT: a
+% The output is "activated" data. This entails an alteration of the
+% original datastream by squeezing it into a different shape, theoretically
+% increasing the relative value of important feature.
+
     switch func
         case 'relu'
             if derivative
-                if h < 0
-                    a = 0;
-                else
-                    a = 1;
-                end
+                a = 1 .* (h>0);
             else
-                a = max(0,h);
+                a = h .* (h>0);
+            end
+        case 'leaky'
+            if derivative
+                a = 1 .* (h > 0) +...
+                    .01*(1 .* (h < 0));
+            else
+                a = h .* (h > 0) + ...
+                    .01*(h .* (h < 0));
             end
         case 'tanh'
             if derivative
@@ -46,8 +58,7 @@ function a = activate(h, func, derivative)
             else
                 a = softmax(h);
             end
-        otherwise
-            % default is the Sigmoid function
+        case 'sigmoid'
             if derivative
                 a = sigmoid(h) .* (1 - sigmoid(h));
             else
