@@ -5,13 +5,12 @@ classdef Network < handle
         weights = {};       % matrices of weights between nodes
         memory = {};        % output from prior layer to current layer
         bias = {};          % bias
-        transfer = '';      % transfer function type
-        lastLayer = '';     % activation function for output layer
-        costFunction = '';  % type of cost function
+        oldDeltas = {};      % deltas used in last 
         
         % metric parameters
         errors = [];        % stores history of errors over the epochs
-        accuracy;           % accuracy per batch
+        accuracy;           % running accuracy
+        precision;          % running precision
         images = [];        % structure for image data
         labels = [];        % structure for image labels
         encodedLabels = []; % structure for one hot encoded image labels
@@ -19,7 +18,24 @@ classdef Network < handle
         % hyperparameters
         epochs;             % number of cycles through the training data
         eta;                % learning rate
+        lambda;             % regularization hyperparameter
+        mu;                 % momentum hyperparameter
+        droprate;           % drop rate for use with dropout
         batches;            % number of batches for mini-batch training
+        transfer = '';      % transfer function type
+        lastLayer = '';     % activation function for output layer
+        costFunction = '';  % type of cost function
+        dropout;            % dropout rate
+        optim = ...
+            struct('none', true,...
+                   'ridge',false,...
+                   'lasso',false,...
+                   'momentum',false,...
+                   'dropout',false,...
+                   'ADAgrad', false,...
+                   'RMSprop', false,...
+                   'early', false);       % type of optimization to use
+    
     end
     methods
         % constructor 
@@ -39,25 +55,34 @@ classdef Network < handle
             net.lastLayer = 'softmax';
             net.costFunction = 'cross';
             
+            % allocate space for oldDeltas
+            for i = 1:length(w)
+                net.oldDeltas{i} = zeros(size(w{i}));
+            end
+            
             % metric parameters
-            net.errors = [0 0];
-            net.accuracy = 0;
+            net.errors = [];
+            net.accuracy = [];
             net.images = [];
             net.labels = [];
             net.encodedLabels = [];
             
             % hyperparameters
-            net.epochs = 1000;
-            net.eta = .001;
-            net.batches = round(2*sqrt(double(layers(1))));
+            net.epochs = 300;
+            net.eta = .0001;
+            net.lambda = .01;
+            net.mu = .5;
+            net.batches = 64;
+            net.optim.lasso = false;
+            net.dropout = 0;
         end
 
-        function [h] = feedforward(layer, X)
+        function [h] = feedforward(self, layer, X)
         %feedforward returns the linear matrix from the given data
         % W: weight matrix
         % X: data from previous layer
         % b: bias vector
-            h = feedforward(layer, net.weights, X, net.bias);
+            h = feedforward2(self, layer, X);
         end
 
         function [c] = cost(func, prediction, targets)
@@ -107,7 +132,6 @@ classdef Network < handle
         %  - true: used for backpropagation
         %  - false: used for feedforward
             a = activate(h, func, derivative);
-        end
-        
+        end       
     end
 end
