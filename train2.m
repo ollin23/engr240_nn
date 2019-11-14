@@ -145,6 +145,9 @@ function [err, acc, prec] = train2(self)
         runningAccuracy = cat(1,acc,runningAccuracy);
         runningError = cat(1,J,runningError);
 
+        % * * * * * * * * * * * * * * * * * 
+        %            BACKPROP
+        % * * * * * * * * * * * * * * * * *
         [w, b] = backprop2(self, prediction, target, self.images(sample,:));
         b = mean(b,2);
         newWeights(counter,:) = w;
