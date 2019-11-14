@@ -28,25 +28,26 @@ for layer = layers:-1:1
     delta = gradient' * a;
     deltaBias = mean(mean(gradient') * self.bias(layer));
     
-    % * * * * * * * * 
-    % OPTIMIZATIONS
-    % * * * * * * * * 
+    % * * * * * * * * * * * * * * * * 
+    %        OPTIMIZATIONS
+    % * * * * * * * * * * * * * * * * 
     delta = self.eta * delta;
     deltaBias = self.eta * deltaBias;
     if ~(self.optim.none)
         if self.optim.lasso
-            delta = delta +...
-                self.lambda * norm(self.weights{layer}) / length(self.labels);
+            delta = delta + ...
+                self.lambda * norm(self.weights{layer}) / ...
+                numel(self.weights{layer});
         end
         if self.optim.ridge
             delta = delta + ...
-                self.lambda * norm(self.weights{layer}.^2) / length(self.labels);
+                self.lambda * norm(self.weights{layer}.^2) / ...
+                numel(self.weights{layer});
         end
         if self.optim.momentum
             delta = delta + self.mu * self.oldDeltas{layer};
         end
     end
-    
     
     weightDelta{layer} = delta;
     biasDelta(layer) = deltaBias;
