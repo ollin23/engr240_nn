@@ -1,25 +1,36 @@
 % This is the main script file for the project
-clear; clc;
+clear;clc; 
 
 % clear layers nodes outputCount response counter;
 format compact;
 
+fprintf('\nLoading Project training data. Please wait a moment...\n');
+
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
+%          Section 1: Data Preparation
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
 % % actual data
-% data = load('train_data.csv');
-datadir = [pwd '\project\test_samples.csv'];
+% datadir = [pwd '\project\train_data.csv'];
+
+% the below is test data of 1000 samples to keep training times short
+% during build
+datadir = [pwd '\project\samples1k.csv'];
+
+% load data
 data = load(datadir);
  
 % split data file into images and labels
-[labels, images] = samples(data);
+[labels, images] = MNIST(data);
 
-%normalize image data
-images = images / 255;
 
+
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
+%        Section 2.1: Parameter Initialization
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
 % get size of output vector
 [sampleCount, imgSize] = size(images);
 nodes = imgSize;
 outputCount = length(unique(labels));
-
 
 %determine default count of nodes in layer and number of layers
 counter = 1;
@@ -44,25 +55,71 @@ if (strcmp(answer,'n') || strcmp(answer(1),'n'))
     layers = [imgSize nodesEachLayer outputCount];
 end
 
-% create network 
-nn = Network(layers);
+% create network
+net = Network(layers);
 
 % display the network topology
 displayNetworkDesign(layers);
 disp('<< Press Enter to continue...>>');
-pause();
+% pause();
 
 % encode the labels
-% Add network metric parameters
-nn.encodedLabels = oneHotEncoding(labels);
-nn.images = images;
-nn.labels = labels;
+% add network metric parameters
+net.encodedLabels = oneHotEncoding(labels);
+net.images = images;
+net.labels = labels;
 
-% Adjust Network parameters
-% epochs, batches, transfer function
-nn.epochs = 1000;
-nn.batches = 100;
-nn.transfer = 'tanh';
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
+%    Section 2.2: Hyperparameter Initialization
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
+% adjust network parameters
+% epochs, batches, transfer function, output function, optimization
+% method, and 
+
+fprintf('\n ((hyperparameter initialization))\n\n');
+% set defaults
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+% REMOVE THIS SECTION FROM FINAL VERSION
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+net.epochs = 1000;
+net.eta = .0001;
+net.batches = 1;   % SGD (stochastic gradient descent) = sampleSize, 
+net.lambda = .01;
+net.mu = .7;
+net.transfer = 'leaky';       % default tanh hyperbolic tangent
+net.lastLayer = 'softmax';
+net.optim.none = true;   % not particularly useful with tanh and softmax
+net.optim.lasso = false;
+net.optim.ridge = false;
+net.optim.momentum = false;
+net.optim.dropout = false;
+net.costFunction = 'mse';  % pairs with softmax
+
+% give user opportunity to change defaults
+menuHyper(net);
+fprintf(' << Press any key to continue >>\n');
+pause();
 
 
-fit(nn);
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
+%          Section 3: Train the Network
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
+% train the network
+% shuffledIndex = randperm(length(nn.images));
+% nn.images= nn.images(shuffledIndex,:);
+fit(net);
+
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
+%        Section 4: Test
+%* * * * * * * * * * * * * * * * * * * * * * * * * *
+
+% data = load('test_data.csv');
+% fprintf('\nLoading Project data. Please wait a moment...\n');
+% datadir = [pwd '\project\test_data.csv'];
+% data = load(datadir);
+% split data file into images and labels
+% [tstLabels, tstImages] = MNIST(data);
+% net.images = tstImages
+% net.labels = tstLabels
+
+
