@@ -34,5 +34,9 @@ for i = 1:step:rows
 %     pause();
 end
 
+
+%normalize image data
+images = images / 255;
+
 close all;
 end
