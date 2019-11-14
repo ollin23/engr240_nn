@@ -87,7 +87,7 @@ function [err, acc, prec] = train2(self)
             end
             if self.optim.ridge
                 L2norm = 0;
-                for w = 1:lenth(self.weights)
+                for w = 1:length(self.weights)
                     L2norm = L2norm + norm(self.weights{w}.^2);
                 end
                 J = J + ...
