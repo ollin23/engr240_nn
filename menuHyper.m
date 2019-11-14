@@ -36,8 +36,10 @@ while (finished == false)
             hyperDisplay(answer);
             response = input('\nChange this parameter? (y/N) ','s');
             if strcmpi(response,'y')
-                raw_answer = input('\nEnter new value (must be integer over zero): ');
-                epochs = abs(int32(raw_answer));
+                raw_answer = input('\nEnter new value (must be integer over zero): ','s');
+                raw_answer = str2double(raw_answer);
+                raw_answer = raw_answer(1);
+                epochs = abs(raw_answer);
                 if epochs == 0
                     epochs = 1;
                 end
@@ -52,10 +54,11 @@ while (finished == false)
             hyperDisplay(answer);
             response = input('\nChange this parameter? (y/N) ','s');
             if strcmpi(response,'y')
-                raw_answer = input('\nEnter new value (must be integer over zero): ');
-                batchCount = abs(int32(raw_answer));
+                raw_answer = input('\nEnter new value (must be integer over zero): ','s');
+                raw_answer = str2double(raw_answer);
+                batchCount = abs(raw_answer);
                 if batchCount == 0
-                    batchCount = 1;
+                    batchCount = 1000;
                 end
                 self.batches = batchCount;
             end
@@ -74,7 +77,7 @@ while (finished == false)
                     raw_answer = input('\nEnter new function (enter for default): ','s');
                     if strcmpi(raw_answer,'')
                         transferred = true;
-                    elseif contains(selection,raw_answer)
+                    elseif contains(selection,lower(raw_answer))
                         transferred = true;
                         self.transfer = raw_answer;
                     else
@@ -101,7 +104,7 @@ while (finished == false)
                     raw_answer = input('\nEnter new function (enter for default): ');
                     if strcmpi(raw_answer,'')
                         doneYet = true;
-                    elseif contains(selection,raw_answer)
+                    elseif contains(selection,lower(raw_answer))
                         doneYet = true;
                         self.lastLayer = raw_answer;
                     else
@@ -129,7 +132,7 @@ while (finished == false)
                     raw_answer = input('\nEnter new function (enter for default): ','s');
                     if strcmpi(raw_answer,'')
                         doneYet = true;
-                    elseif contains(selection,raw_answer)
+                    elseif contains(lower(selection),lower(raw_answer))
                         doneYet = true;
                         self.costFunction = raw_answer;
                     else
@@ -164,7 +167,6 @@ while (finished == false)
     end
 end
 
-
     function hyperDisplay(choice)
         fprintf('\n');
         switch choice
@@ -177,14 +179,17 @@ end
             
             case 2
             fprintf('*** Number of Batches Selection ***\n')
-            fprintf(['\tThe batches hyperparameter divides the sample\n',...
+            fprintf(['The batches hyperparameter divides the sample\n',...
                      'size for each loss calculation into a chosen \n',...
-                     'number of batches to process per epoch.\n',...
-                     '\tA value of one is called Batch Gradient\n',...
-                     'Descent (BGD). When the batch size equals the\n',...
-                     'sample size the loss is calculated after each\n',...
-                     'training sample. This is stochastic gradient\n',...
-                     'descent (SGD). Any value between the above\n',...
+                     'number of batches to process per epoch.\n\n',...
+                     '1)A value of one is called Batch Gradient\n',...
+                     '\tDescent (BGD).\n',...
+                     '2)When the batch size equals the\n',...
+                     '\tsample size the loss is calculated after each\n',...
+                     '\ttraining sample. This is stochastic gradient\n',...
+                     '\tdescent (SGD).',...
+                     '3 to %d) MiniBatch. Any value between the above\n',...
+                          length(self.labels),...
                      'produces minibatches called Mini-Batch Gradient\n',...
                      'Descent (MBGD).\n\n']);
             fprintf('Current batches = %d\t\n',self.batches);
@@ -241,17 +246,23 @@ end
 
 % adjust the initialization of weights according to the transfer function
 switch self.transfer
-    case {'relu' 'leaky'}
+    case {'relu', 'leaky'}
+        fprintf('Re-establishing network weights:\n');
+        fprintf('ReLU and Leaky ReLU work best using Golorot initialization.\n');
+        
         for i = 1:length(self.weights)
             self.weights{i} = randn(size(self.weights{i})) *...
-                (1/sqrt(length(self.labels)));
+                (2/sqrt(length(self.weights{i})));
         end
     case 'tanh'
         for i = 1:length(self.weights)
+            fprintf('Re-establishing network weights...'\n);
+            fprintf('Tanh work best using Xavier initialization.\n');
             self.weights{i} = randn(size(self.weights{i})) *...
-                (2/sqrt(length(self.labels)));
+                (1/sqrt(length(self.weights{i})));
         end
 end
 
+pause();
 
 end % end of function
