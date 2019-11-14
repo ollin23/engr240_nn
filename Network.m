@@ -5,12 +5,14 @@ classdef Network < handle
         weights = {};       % matrices of weights between nodes
         memory = {};        % output from prior layer to current layer
         bias = {};          % bias
-        oldDeltas = {};      % deltas used in last 
+        oldDeltas = {};     % deltas used in last 
         
         % metric parameters
         errors = [];        % stores history of errors over the epochs
-        accuracy;           % running accuracy
-        precision;          % running precision
+        accuracy = [];      % running accuracy
+        precision = [];     % running precision
+        
+        % image parameters
         images = [];        % structure for image data
         labels = [];        % structure for image labels
         encodedLabels = []; % structure for one hot encoded image labels
@@ -21,20 +23,23 @@ classdef Network < handle
         lambda;             % regularization hyperparameter
         mu;                 % momentum hyperparameter
         droprate;           % drop rate for use with dropout
+        dropmasks = {};     % the masks for the dropout layers
         batches;            % number of batches for mini-batch training
         transfer = '';      % transfer function type
         lastLayer = '';     % activation function for output layer
         costFunction = '';  % type of cost function
-        dropout;            % dropout rate
+        
+        % NOTES:    (1) none overrides all other optimization techniques
+        %           (2)ADAgrad, and RMSprop are mutually exclusive
         optim = ...
-            struct('none', true,...
-                   'ridge',false,...
-                   'lasso',false,...
-                   'momentum',false,...
-                   'dropout',false,...
-                   'ADAgrad', false,...
-                   'RMSprop', false,...
-                   'early', false);       % type of optimization to use
+            struct('none', true,...     % no optimizations used
+                   'ridge',false,...    % L1 regularization
+                   'lasso',false,...    % L2 regularization
+                   'momentum',false,... % enables gradient momentum
+                   'dropout',false,...  % enables random dropout
+                   'ADAgrad', false,... % enables ADAgrad
+                   'RMSprop', false,... % enables RMSprop
+                   'early', false);     % enables early termination
     
     end
     methods
@@ -63,6 +68,9 @@ classdef Network < handle
             % metric parameters
             net.errors = [];
             net.accuracy = [];
+            net.precision = [];
+            
+            % image parameters
             net.images = [];
             net.labels = [];
             net.encodedLabels = [];
@@ -73,8 +81,7 @@ classdef Network < handle
             net.lambda = .01;
             net.mu = .5;
             net.batches = 64;
-            net.optim.lasso = false;
-            net.dropout = 0;
+            net.droprate = .8;
         end
 
         function [h] = feedforward(self, layer, X)
