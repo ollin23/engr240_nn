@@ -6,15 +6,17 @@ function [err, acc, prec] = train2(self)
     [sampleSize,~] = size(self.images);
 
     % determine batch size
-    % If batchSize == 1 or 0, then batchSize = 1
-    if self.batches == 1 || self.batches == 0
-        batchSize = sampleSize;
+    % self.batches == 0, then batchSize == 1 , Stochastic Gradient Descent
+    % self.batches == 1, batchSize == 1000, Batch Gradient Descent
+    if self.batches == 0
+        batchSize = 1000;
     elseif self.batches > sampleSize
-        batchSize = sampleSize;
+        batchSize = mod(self.batches,sampleSize);
     else
         batchSize = ceil(sampleSize / self.batches);
     end
     layers = length(self.weights);
+    fprintf('layers : %d\n',layers);
     
     % allocate space for error, new weights, new biases, running accuracy
     % and running precision
@@ -91,7 +93,7 @@ function [err, acc, prec] = train2(self)
                     L2norm = L2norm + norm(self.weights{w}.^2);
                 end
                 J = J + ...
-                     (self.lambda / numel(self.labels)) * ...
+                     (self.lambda / length(self.labels)) * ...
                      L2norm;
 %                     sum(cellfun(@(x)sum(x(:).^2),self.weights));
             end
@@ -145,25 +147,29 @@ function [err, acc, prec] = train2(self)
         runningAccuracy = cat(1,acc,runningAccuracy);
         runningError = cat(1,J,runningError);
 
-        % * * * * * * * * * * * * * * * * * 
-        %            BACKPROP
-        % * * * * * * * * * * * * * * * * *
         [w, b] = backprop2(self, prediction, target, self.images(sample,:));
         b = mean(b,2);
         newWeights(counter,:) = w;
         newBias(counter,:) = b;
         
-        % * * * * * * * * * * * * * *
-        %            UPDATE
-        % * * * * * * * * * * * * * *
+        % * * * * * * * * * * * * * * * * * * * * *
+        %      UPDATE PARAMETERS AND METRICS
+        % * * * * * * * * * * * * * * * * * * * * *
         % update according to batchSize
-        % the below enables the use of SGD, batch, and various sizes of
-        % minibatches
-        if mod(sample,batchSize) == 0 && batchSize > 1 && sample ~= 1
-            newWeights = mean(cellfun(@(x)mean(x(:,1)),newWeights));
-            newBias = mean(newBias);
+        % the below enables the use of SGD (batchSize == 1),
+        % Batch Gradient Descent (batchSize = sampleSize),
+        % and various in between sizes, ak Mini-batch Gradient Descent
+        if mod(sample,batchSize) == 0 %&& sample ~= 1 %&& batchSize > 1
+            if batchSize > 1
+                 for i = 1:layers
+                    tmp = newWeights(:,i);
+                    newWeights{i} = (mean(tmp{i}));
+                    newBias(i) = mean(newBias(i));
+                 end
+            end
             
-            
+%            newWeights = mean(cellfun(@(x)sum(x(:,1).^2),newWeights));
+            pause()
             err = mean(runningError);
             acc = mean(runningAccuracy);
             prec = mean(runningPrecision);
