@@ -1,20 +1,27 @@
 # engr240_nn
 MATLAB based MLP
 This is the project for my Engineering Applications class for Fall 2019.
-Last update: 12 Nov 2019
+Last update: 15 Nov 2019
 
-NOTES
-- Changed optimization implementation. A struct was more useful than several independent variables.
-- Still in process of implementing two more gradient optimizations.
-- A menu to select optimization features will be added as well as options to save the
-  visualizations generated at the end of training.
-- Designing prediction function to work non-training data.
 
 
 Updates:
-- backprop2: added some optimization options
-- train2: added some optimization options; tweaked the accuracy and error metrics
-- MNIST: renamed from samples
+- fit2: updated with early stop, longmemory, r2, and more plots implementation
+- Network:
+    * properties added -
+        o trial - keeps track of trial runs (one trial = 1 set of training through all epochs)
+        o r2 - R-squared, stored per trial, tracked per epoch
+        o longmemory - history of output throughout a trial
+    * functions added -
+        o report() and timedReport() - generate text reports and save the network in a mat file
+        o reset() - resets the network to original parameters
+        o fit() - updated to include dropout option
+- train2: updated with longmemory property, optimizations tested
+- cost: updated with derivative parameter
+- pred: prediction function
+- normalize: function to normalize data
+- activate: minor documentation update
+
 
 Functions:
 - activate: activation functions
@@ -23,7 +30,7 @@ Functions:
 - createNetwork: initializes the neural net
 - displayNetworkDesign: allows user to numerically see how the network is designed
 - feedforward2: feedforward algorithm
-- fit: wrapper function for training data; implements epoch cycles and graph
+- fit2: wrapper function for training data; implements epoch cycles and graph
 - menu: menu to drive topology design
 - menuHyper: menu to drive hyperpamater tuning
 - oneHotEncoding: encodes input data
@@ -46,11 +53,14 @@ Files
 - feedforward: simple feedforward process(weights * input + data)
 - train: trains the neural net
 - update: update the weights and biases
+- fit: replaced with fit2
 
-Notes, 8 Nov 2019:
-- fixed relu errors; still potentially unstable
-- fixed error history storage
-- added graph of errors
+Notes, 12 Nov 2019
+- Changed optimization implementation. A struct was more useful than several independent variables.
+- Still in process of implementing two more gradient optimizations.
+- A menu to select optimization features will be added as well as options to save the
+  visualizations generated at the end of training.
+- Designing prediction function to work non-training data.
 
 Notes, 11 Nov 2019:
 - massive update. Rewrote the backpropagation algorithm after encountering an intractable problem
@@ -65,3 +75,8 @@ Notes, 11 Nov 2019:
 - regularization has yet to be implemented
 - still intend to fully implement OOP functions; currently receiving errors for all of them except the
   constructor function
+
+Notes, 8 Nov 2019:
+- fixed relu errors; still potentially unstable
+- fixed error history storage
+- added graph of errors
