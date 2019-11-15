@@ -176,8 +176,9 @@ classdef Network < handle
             end
 
             %save neural network
-            networkName = [fileName '_network_trial' num2str(self.trial) '.mat'];
-            save(networkName, self);            
+            fName = fileName(1:end-4);
+            networkName = [fName '_network_trial_' num2str(self.trial) '.mat'];
+            save(networkName, 'self');
             
             fprintf(fileID,'\n\nTrial %d\n',self.trial);
 
