@@ -22,6 +22,7 @@ function a = activate(h, func, derivative)
 % function will use its derivative. The derivative of the activation
 % function is used to find the gradient for the node during
 % backpropagation.
+%
 % VALUES:
 %  - true: used for backpropagation
 %  - false: used for feedforward
@@ -30,6 +31,7 @@ function a = activate(h, func, derivative)
 % The output is "activated" data. This entails an alteration of the
 % original datastream by squeezing it into a different shape, theoretically
 % increasing the relative value of important feature.
+
 
     switch func
         case 'relu'
@@ -65,4 +67,5 @@ function a = activate(h, func, derivative)
                 a = sigmoid(h);
             end
     end
+    
 end

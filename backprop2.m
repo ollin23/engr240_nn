@@ -17,7 +17,9 @@ for layer = layers:-1:1
         a = activate(h,self.transfer,true);
     else
         gradient = gradient * self.weights{layer+1};
-        gradient = activate(h,self.transfer,true) .* gradient;
+        a = activate(h,self.transfer,true);
+        gradient = a .* gradient;
+
         if layer-1 == 0
             a = input;
         else

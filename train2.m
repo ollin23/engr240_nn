@@ -16,7 +16,6 @@ function [err, acc, prec] = train2(self)
         batchSize = ceil(sampleSize / self.batches);
     end
     layers = length(self.weights);
-    fprintf('layers : %d\n',layers);
     
     % allocate space for error, new weights, new biases, running accuracy
     % and running precision
@@ -47,8 +46,9 @@ function [err, acc, prec] = train2(self)
         target = self.encodedLabels(sample,:);
         label = self.labels(sample);
 
-        % * * * * * * *
-        % FEEDFORWARD
+        % * * * * * * * * * * *
+        %      FEEDFORWARD
+        % * * * * * * * * * * *
         for l = 1:layers
             h = feedforward2(self, l, input);
             
@@ -71,10 +71,14 @@ function [err, acc, prec] = train2(self)
                 prediction = a;
             end
         end % end of layers
+        
+        tmpCell = mat2cell([prediction target],1,[10 10]);
+        self.longmemory = cat(1,tmpCell,self.longmemory);
+        
         % * * * * * * * * * * * *
         % Calculate Error
         % * * * * * * * * * * * *
-        J = cost(self.costFunction, prediction, target);
+        J = cost(self.costFunction, prediction, target, false);
 
         if ~(self.optim.none)
             if self.optim.lasso
@@ -83,9 +87,9 @@ function [err, acc, prec] = train2(self)
                     L1norm = L1norm + norm(self.weights{w});
                 end
                 J = J + ...
-                     (self.lambda / numel(self.weights)) * ...
-                     L1norm;
-%                     sum(cellfun(@(x)sum(x(:)),self.weights));
+                    (self.lambda / numel(self.weights)) * ...
+                    L1norm;
+                    % sum(cellfun(@(x)sum(x(:)),self.weights));
             end
             if self.optim.ridge
                 L2norm = 0;
@@ -93,21 +97,20 @@ function [err, acc, prec] = train2(self)
                     L2norm = L2norm + norm(self.weights{w}.^2);
                 end
                 J = J + ...
-                     (self.lambda / length(self.labels)) * ...
-                     L2norm;
-%                     sum(cellfun(@(x)sum(x(:).^2),self.weights));
+                    (self.lambda / length(self.labels)) * ...
+                    L2norm;
+                    % sum(cellfun(@(x)sum(x(:).^2),self.weights));
             end
         end
         
 
         % calculate accuracy and precision
-        p = round((prediction - min(prediction))/(max(prediction) - min(prediction)));
+        p = round(normalize(prediction));
         
-%         [~,c] = max(prediction);
-%         oPred = oneHotEncoding(1:length(target));
-%         p = oPred(c,:);
-%         
-  
+        % [~,c] = max(prediction);
+        % oPred = oneHotEncoding(1:length(target));
+        % p = oPred(c,:);
+
         positives = nnz(p);
         if positives > 0
             diff = (target - p);
@@ -115,32 +118,17 @@ function [err, acc, prec] = train2(self)
             FN = nnz(diff>0);
             TN = sum(p == diff);
             TP = abs(1-FN);
-            pLabel = mod(find(p>0),length(target));
+            %pLabel = mod(find(p>0),length(target));
         else
             FP = 0;
             TP = 0;
             FN = 1;
             TN = 9;
-            pLabel = -1;
+            %pLabel = -1;
         end
-        
-        %acc = (pLabel == label);
-       
-        
-%          fprintf('\nlabel :      %d\n',label);
-%          fprintf('\nprediction : %d\n',pLabel);
-%          pause();
 
         acc = (TP + FP)/(FP + TP + FN + TN);
         prec = TP / (TP + FP);
-%         fprintf('accuracy:\n');
-%         fprintf('\t(TP + FP)/(FP + TP + FN + TN)\n');
-%         fprintf('\t(%d + %d)/(%d + %d + %d + %d) = %0.4f\n',TP,FP,FP,TP,FN,TN,acc); 
-%         fprintf('precision:\n');
-%         fprintf('\tTP / (TP + FP)\n');
-%         fprintf('\t%D / (%d + %d) = %0.4f\n',TP, TP,FP,prec);
-%         fprintf('Error : %0.5f\n',J);
-%         pause();
 
         % append precision, accuracy, and error
         runningPrecision = cat(1,prec,runningPrecision);
@@ -159,7 +147,7 @@ function [err, acc, prec] = train2(self)
         % the below enables the use of SGD (batchSize == 1),
         % Batch Gradient Descent (batchSize = sampleSize),
         % and various in between sizes, ak Mini-batch Gradient Descent
-        if mod(sample,batchSize) == 0 %&& sample ~= 1 %&& batchSize > 1
+        if mod(sample,batchSize) == 0
             if batchSize > 1
                  for i = 1:layers
                     tmp = newWeights(:,i);
@@ -168,8 +156,7 @@ function [err, acc, prec] = train2(self)
                  end
             end
             
-%            newWeights = mean(cellfun(@(x)sum(x(:,1).^2),newWeights));
-            pause()
+            % newWeights = mean(cellfun(@(x)sum(x(:,1).^2),newWeights));
             err = mean(runningError);
             acc = mean(runningAccuracy);
             prec = mean(runningPrecision);

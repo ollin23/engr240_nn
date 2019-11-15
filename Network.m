@@ -4,6 +4,7 @@ classdef Network < handle
         % internal parameters
         weights = {};       % matrices of weights between nodes
         memory = {};        % output from prior layer to current layer
+        longmemory = {};    % keeps record of the epoch's output
         bias = {};          % bias
         oldDeltas = {};     % deltas used in last 
         
@@ -11,6 +12,7 @@ classdef Network < handle
         errors = [];        % stores history of errors over the epochs
         accuracy = [];      % running accuracy
         precision = [];     % running precision
+        r2 = [];            % r-squared
         
         % image parameters
         images = [];        % structure for image data
@@ -23,12 +25,12 @@ classdef Network < handle
         lambda;             % regularization hyperparameter
         mu;                 % momentum hyperparameter
         droprate;           % drop rate for use with dropout
-        dropmasks = {};     % the masks for the dropout layers
+        dropmask = {};      % the mask for the dropout layers
         batches;            % number of batches for mini-batch training
         transfer = '';      % transfer function type
         lastLayer = '';     % activation function for output layer
         costFunction = '';  % type of cost function
-        
+        trial;              % ordinal number in series of trials
         % NOTES:    (1) none overrides all other optimization techniques
         %           (2)ADAgrad, and RMSprop are mutually exclusive
         optim = ...
@@ -40,7 +42,7 @@ classdef Network < handle
                    'ADAgrad', false,... % enables ADAgrad
                    'RMSprop', false,... % enables RMSprop
                    'early', false);     % enables early termination
-    
+               
     end
     methods
         % constructor 
@@ -82,63 +84,283 @@ classdef Network < handle
             net.mu = .5;
             net.batches = 64;
             net.droprate = .8;
+            
+            net.trial = 1;
         end
 
-        function [h] = feedforward(self, layer, X)
-        %feedforward returns the linear matrix from the given data
-        % W: weight matrix
-        % X: data from previous layer
-        % b: bias vector
-            h = feedforward2(self, layer, X);
+        % prediction function
+%         function predict(self, X)
+%             [correct, wrong] = predict(self, X);
+%             correct;
+%             wrong;
+%         end
+        
+        % executes training cycles
+        function fit(self)
+            
+            % if dropout active, create dropout mask
+            if self.optim.dropout && ~self.optim.none
+                for i = 1:length(self.weights)
+                    self.dropmask{i} = ...
+                        rand(size(self.weights{i})) < self.droprate;
+                
+                    % apply dropout mask scale remaining
+                    % neurons proportionately to droprate
+                    self.weights{i} = self.weights{i} .* self.dropmask{i};
+                    self.weights{i} = self.weights{i} / self.droprate;
+                end
+            end
+            fit2(self);
         end
 
-        function [c] = cost(func, prediction, targets)
-        %cost returns the cost/loss depending on the activation function
-        %
-        % func : the type of cost/loss function; string input
-        % options -
-        %   'cross'
-        %       :: calculates the cross-entropy of between the prediction data and
-        %          the labeled data
-        %   'hinge'
-        %       :: hinge loss used for classifiers; typically used for support
-        %          vector machines (SVMs), but applicable elsewhere
-        %   'KL'
-        %       :: KullBack-Leibler Divergence, also called relative entropy
-        %          is a measure of how the predicted probability distribution differs
-        %          from the labeled data
-        %   'MSE' (mean squared error)
-        %       :: calculates the mean squared error the prediction data and
-        %          the labeled data
-            c = cost(func, prediction, targets);
+        % reset the network
+        function reset(self)
+        % reset the network weights, biases, memory, oldDelta, errors,
+        % accuracy, and precision
+        
+            % reset weights and biases
+            switch self.transfer
+                case {'relu', 'leaky'}
+                    for i = 1:length(self.weights)
+                        self.weights{i} = randn(size(self.weights{i})) *...
+                            (2/sqrt(length(self.weights{i})));
+                        self.bias(i) = 1;
+                    end
+                case 'tanh'
+                    for i = 1:length(self.weights)
+                        self.weights{i} = randn(size(self.weights{i})) *...
+                            (1/sqrt(length(self.weights{i})));
+                        self.bias(i) = 1;
+                    end
+                otherwise
+                    layers =  length(self.weights);
+                    for i = 1:layers
+                        H1 = numel(self.weights{i});
+                        if i == 1
+                            H2 = H1;
+                        else
+                            H2 = numel(self.weights{i-1});
+                        end
+                        b = sqrt(6) / sqrt(H1 + H2);
+                        % if last layer
+                        if i == layers
+                            rows = length(unique(net.labels));
+                        else
+                            rows = length(self.weights{i+1});
+                        end
+                        columns = size(self.weights{i},1);
+                        self.weights{i} = -b + (2*b)*rand([rows columns]);
+                        self.bias(i) = 1;
+                    end
+            end % end switch
+            
+            % reset the rest
+            self.memory = {};
+            self.oldDeltas = {};
+            self.longmemory = {};
+            self.errors = [];
+            self.accuracy = [];
+            self.precision = [];
+                
+        end % end function:  reset
+
+        % generate a report without time elapsed
+        function report(self)
+        % generate a report without the time elapsed recorded
+            dtg = datestr(now,'yyyymmdd_HHMM');
+            fileName = [pwd '\Documents\trial_' dtg '.txt'];
+            if self.trial == 1
+                fileID = fopen(fileName,'w');
+            else
+                fileID = fopen(fileName,'a+');
+            end
+
+            %save neural network
+            networkName = [fileName '_network_trial' num2str(self.trial) '.mat'];
+            save(networkName, self);            
+            
+            fprintf(fileID,'\n\nTrial %d\n',self.trial);
+
+            fprintf(fileID,'Total epochs:  %d\n',self.epochs);
+            fprintf(fileID,'Average accuracy: %0.5f\n',mean(self.accuracy));
+            fprintf(fileID,'Average precision: %0.5f\n',mean(self.precision));
+            fprintf(fileID,'R^2: %0.5f\n',self.r2);
+            fprintf(fileID,'Learning rate:  %d\n',self.eta);
+            fprintf(fileID,'Batches:  %d\n',self.batches);
+            fprintf(fileID,'NOTE: BGD = 0, SGD = 1\n');
+            fprintf(fileID,'Regularization hyperparameter:  %d\n',self.lambda);
+            fprintf(fileID,'Momentum:  %d\n',self.mu);
+            fprintf(fileID,'Transfer function:  %d\n',self.transfer);
+            fprintf(fileID,'Output function:  %d\n',self.lastLayer);
+            fprintf(fileID,'Cost function:  %d\n',self.costFunction);
+            
+            fprintf(fileID,'* Optimization schema *\n');
+            if self.optim.none
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tNone: %s\n',outString);
+            
+            if self.optim.lasso
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tLasso regularization: %s\n',outString);
+            
+            if self.optim.ridge
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tRidge regularization: %s\n',outString);
+            
+            if self.optim.momentum
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tMomentum: %s\n',outString);
+            
+            if self.optim.ADAgrad
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tADAgrad: %s\n',outString);
+            
+            if self.optim.RMSprop
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tRMSprop: %s\n',outString);
+            
+           
+            if self.optim.dropout
+                outString = 'true';
+                fprintf(fileID,'\tDropout: %d\n',outString);
+                fprintf(fileID,'\t\t(Drop rate: %0.1f)\n',self.droprate);
+            else
+                outString = 'false';
+                fprintf(fileID,'\tDropout: %d\n',outString);
+            end
+            
+            
+            fclose(fileID);
+
+            figureName = [pwd '\images\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+            savefig(figureName);
+
+            self.trial = self.trial + 1;
+            pause(1);
         end
         
-        function [a] = activate(h, func, derivative)
-        %ACTIVATE takes the hypothesis vector, h, and transforms it into output for
-        %the next layer of the neural net
-        %
-        % PARAMTER: h
-        % The input vector.
-        %
-        % PARAMETER: func
-        % A string indicating one of he four activation functions.
-        % VALUES:
-        %  - relu: Rectified Linear Unit (also known as ReLU). Returns the max of
-        %       the input linear function or zero.
-        %  - tanh: hyperbolic tangent. Transforms h to the range of (-1,1)
-        %  - softmax: softmax function (see softmax notes). Used primarily for the
-        %       output layer
-        %  - sigmoid: the default activation function
-        %
-        % PARAMETER: derivative
-        % The parameter derivative is a boolean which determines if the activation
-        % function will use its derivative. The derivative of the activation
-        % function is used to find the gradient for the node during
-        % backpropagation.
-        % VALUES:
-        %  - true: used for backpropagation
-        %  - false: used for feedforward
-            a = activate(h, func, derivative);
-        end       
-    end
-end
+        % generate a report with elapsed time
+        function timedReport(self, epochTime, ep)
+        % generate a report with the time elapsed recorded
+            dtg = datestr(now,'yyyymmdd_HHMM');
+            
+            if self.trial == 1
+                fileName = [pwd '\Documents\trial_' dtg '.txt'];
+                fileID = fopen(fileName,'w');
+            else
+                fileID = fopen(fileName,'a+');
+            end
+            
+            %save neural network
+            fName = fileName(1:end-4);
+            networkName = [fName '_network_trial_' num2str(self.trial) '.mat'];
+            
+            class(networkName)
+            fprintf('%s\n',networkName);
+            
+            save(networkName, 'self');
+            
+            fprintf(fileID,['\nRecord: trial_' dtg '\n']);
+            fprintf(fileID,'\nTrial %d\n',self.trial);
+
+            fprintf(fileID,'Total epochs:  %d\n',self.epochs);
+            if self.optim.early
+                fprintf(fileID,'Epochs trained: %d\n',ep);
+                fprintf(fileID,'Percent epochs completed: %0.2f\n',(ep/self.epochs));
+            end
+            fprintf(fileID,'Total time elapsed: %0.5f seconds\n',epochTime);
+            fprintf(fileID,'Average time per epoch: %0.5f seconds\n',epochTime/self.epochs);
+            fprintf(fileID,'Average accuracy: %0.5f\n',mean(self.accuracy));
+            fprintf(fileID,'Average precision: %0.5f\n',mean(self.precision));
+            fprintf(fileID,'Learning rate:  %0.5f\n',self.eta);
+            fprintf(fileID,'Batches:  %d\n',self.batches);
+            fprintf(fileID,'\t**NOTE: BGD = 0, SGD = 1\n');
+            fprintf(fileID,'Regularization hyperparameter:  %0.5f\n',self.lambda);
+            fprintf(fileID,'Momentum:  %0.2f\n',self.mu);
+            fprintf(fileID,'Transfer function:  %s\n',self.transfer);
+            fprintf(fileID,'Output function:  %s\n',self.lastLayer);
+            fprintf(fileID,'Cost function:  %s\n',self.costFunction);
+            
+            fprintf(fileID,'* Optimization schema *\n');
+            if self.optim.none
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tNone: %s\n',outString);
+            
+            if self.optim.lasso
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tLasso regularization: %s\n',outString);
+            
+            if self.optim.ridge
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tRidge regularization: %s\n',outString);
+            
+            if self.optim.momentum
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tMomentum: %s\n',outString);
+            
+            if self.optim.ADAgrad
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tADAgrad: %s\n',outString);
+            
+            if self.optim.RMSprop
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'\tRMSprop: %s\n',outString);
+           
+            if self.optim.dropout
+                outString = 'true';
+                fprintf(fileID,'\tDropout: %s\n',outString);
+                fprintf(fileID,'\t\t(Drop rate: %0.1f)\n',self.droprate);
+            else
+                outString = 'false';
+                fprintf(fileID,'\tDropout: %s\n',outString);
+            end
+            
+            fclose(fileID);
+
+            figureName = [pwd '\images\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+            savefig(figureName);
+
+            self.trial = self.trial + 1;
+            pause(1);
+        end
+        
+        
+    end % end methods section
+    
+end % end classedef
