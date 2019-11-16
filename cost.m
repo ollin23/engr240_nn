@@ -24,10 +24,9 @@ function [J] = cost(func, prediction, target, derivative)
 %       :: Mean Squared Error, calculates the mean squared error the
 %          prediction data and the labeled data
 %
-% derivative 
-%       :: boolean value; determines if the cost derivative should be used
+% derivative :
+%   boolean value; determines if the cost derivative should be used
 %
-
 
 switch func
     case 'cross'

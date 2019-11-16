@@ -12,12 +12,24 @@ classdef Network < handle
         errors = [];        % stores history of errors over the epochs
         accuracy = [];      % running accuracy
         precision = [];     % running precision
-        r2 = [];            % r-squared
+        R2 = [];            % r-squared
         
         % image parameters
-        images = [];        % structure for image data
+        images = [];        % structure for images data
         labels = [];        % structure for image labels
         encodedLabels = []; % structure for one hot encoded image labels
+        
+        training = [];      % structure for training data
+        tngLabels = [];
+        tngEncLabels = [];
+        
+        val = [];           % structure for validation data
+        valLabels = [];
+        valEncLabels = [];
+        
+        test = [];          % structure for test data
+        tstLabels = [];
+        tstEncLabels = [];
                
         % hyperparameters
         epochs;             % number of cycles through the training data
@@ -42,6 +54,9 @@ classdef Network < handle
                    'ADAgrad', false,... % enables ADAgrad
                    'RMSprop', false,... % enables RMSprop
                    'early', false);     % enables early termination
+               
+        % other parameters
+        fileName;           % name of file to save multiple trials
                
     end
     methods
@@ -71,6 +86,7 @@ classdef Network < handle
             net.errors = [];
             net.accuracy = [];
             net.precision = [];
+            net.R2 = [];
             
             % image parameters
             net.images = [];
@@ -113,79 +129,39 @@ classdef Network < handle
             fit2(self);
         end
 
-        % reset the network
-        function reset(self)
-        % reset the network weights, biases, memory, oldDelta, errors,
-        % accuracy, and precision
+        function split(self, trainSize, valSize, testSize)
+            [trainSet, valSet, testSet] =...
+                split(self.images, trainSize, valSize, testSize);
+            self.training = trainSet;
+            self.val = valSet;
+            self.test = testSet;
+        end
         
-            % reset weights and biases
-            switch self.transfer
-                case {'relu', 'leaky'}
-                    for i = 1:length(self.weights)
-                        self.weights{i} = randn(size(self.weights{i})) *...
-                            (2/sqrt(length(self.weights{i})));
-                        self.bias(i) = 1;
-                    end
-                case 'tanh'
-                    for i = 1:length(self.weights)
-                        self.weights{i} = randn(size(self.weights{i})) *...
-                            (1/sqrt(length(self.weights{i})));
-                        self.bias(i) = 1;
-                    end
-                otherwise
-                    layers =  length(self.weights);
-                    for i = 1:layers
-                        H1 = numel(self.weights{i});
-                        if i == 1
-                            H2 = H1;
-                        else
-                            H2 = numel(self.weights{i-1});
-                        end
-                        b = sqrt(6) / sqrt(H1 + H2);
-                        % if last layer
-                        if i == layers
-                            rows = length(unique(net.labels));
-                        else
-                            rows = length(self.weights{i+1});
-                        end
-                        columns = size(self.weights{i},1);
-                        self.weights{i} = -b + (2*b)*rand([rows columns]);
-                        self.bias(i) = 1;
-                    end
-            end % end switch
-            
-            % reset the rest
-            self.memory = {};
-            self.oldDeltas = {};
-            self.longmemory = {};
-            self.errors = [];
-            self.accuracy = [];
-            self.precision = [];
-                
-        end % end function:  reset
-
         % generate a report without time elapsed
         function report(self)
         % generate a report without the time elapsed recorded
+
+            % the date time group (DTG) is the primary ID tag
             dtg = datestr(now,'yyyymmdd_HHMM');
-            fileName = [pwd '\Documents\trial_' dtg '.txt'];
             if self.trial == 1
-                fileID = fopen(fileName,'w');
+                self.fileName = [pwd '\Documents\session_' dtg '.txt'];
+                fileID = fopen(self.fileName,'w');
             else
-                fileID = fopen(fileName,'a+');
+                fileID = fopen(self.fileName,'a+');
             end
 
             %save neural network
-            fName = fileName(1:end-4);
+            fName = self.fileName(1:end-4);
             networkName = [fName '_network_trial_' num2str(self.trial) '.mat'];
             save(networkName, 'self');
             
+            fprintf(fileID,['\nRecord: session_' dtg '\n']);
             fprintf(fileID,'\n\nTrial %d\n',self.trial);
 
             fprintf(fileID,'Total epochs:  %d\n',self.epochs);
             fprintf(fileID,'Average accuracy: %0.5f\n',mean(self.accuracy));
             fprintf(fileID,'Average precision: %0.5f\n',mean(self.precision));
-            fprintf(fileID,'R^2: %0.5f\n',self.r2);
+            fprintf(fileID,'R^2: %0.5f\n',mean(self.R2));
             fprintf(fileID,'Learning rate:  %d\n',self.eta);
             fprintf(fileID,'Batches:  %d\n',self.batches);
             fprintf(fileID,'NOTE: BGD = 0, SGD = 1\n');
@@ -237,16 +213,23 @@ classdef Network < handle
                 outString = 'false';
             end
             fprintf(fileID,'\tRMSprop: %s\n',outString);
-            
            
             if self.optim.dropout
                 outString = 'true';
                 fprintf(fileID,'\tDropout: %d\n',outString);
-                fprintf(fileID,'\t\t(Drop rate: %0.1f)\n',self.droprate);
+                fprintf(fileID,'\t\t(Drop rate: %0.2f)\n',self.droprate);
             else
                 outString = 'false';
                 fprintf(fileID,'\tDropout: %d\n',outString);
             end
+            
+            if self.optim.early
+                outString = 'true';
+                fprintf(fileID,'\tEarly: %s\n',outString);
+            else
+                outString = 'false';
+                fprintf(fileID,'\tEarly: %s\n',outString);
+            end            
             
             
             fclose(fileID);
@@ -256,22 +239,23 @@ classdef Network < handle
 
             self.trial = self.trial + 1;
             pause(1);
-        end
+        end % end function: report
         
         % generate a report with elapsed time
         function timedReport(self, epochTime, ep)
         % generate a report with the time elapsed recorded
+
+            % the date time group (DTG) is the primary ID tag
             dtg = datestr(now,'yyyymmdd_HHMM');
-            
             if self.trial == 1
-                fileName = [pwd '\Documents\trial_' dtg '.txt'];
-                fileID = fopen(fileName,'w');
+                self.fileName = [pwd '\Documents\session_' dtg '.txt'];
+                fileID = fopen(self.fileName,'w');
             else
-                fileID = fopen(fileName,'a+');
+                fileID = fopen(self.fileName,'a+');
             end
             
             %save neural network
-            fName = fileName(1:end-4);
+            fName = self.fileName(1:end-4);
             networkName = [fName '_network_trial_' num2str(self.trial) '.mat'];
             
             class(networkName)
@@ -279,7 +263,7 @@ classdef Network < handle
             
             save(networkName, 'self');
             
-            fprintf(fileID,['\nRecord: trial_' dtg '\n']);
+            fprintf(fileID,['\nRecord: session_' dtg '\n']);
             fprintf(fileID,'\nTrial %d\n',self.trial);
 
             fprintf(fileID,'Total epochs:  %d\n',self.epochs);
@@ -291,6 +275,7 @@ classdef Network < handle
             fprintf(fileID,'Average time per epoch: %0.5f seconds\n',epochTime/self.epochs);
             fprintf(fileID,'Average accuracy: %0.5f\n',mean(self.accuracy));
             fprintf(fileID,'Average precision: %0.5f\n',mean(self.precision));
+            fprintf(fileID,'R^2: %0.5f\n',mean(self.R2));
             fprintf(fileID,'Learning rate:  %0.5f\n',self.eta);
             fprintf(fileID,'Batches:  %d\n',self.batches);
             fprintf(fileID,'\t**NOTE: BGD = 0, SGD = 1\n');
@@ -346,10 +331,18 @@ classdef Network < handle
             if self.optim.dropout
                 outString = 'true';
                 fprintf(fileID,'\tDropout: %s\n',outString);
-                fprintf(fileID,'\t\t(Drop rate: %0.1f)\n',self.droprate);
+                fprintf(fileID,'\t\t(Drop rate: %0.2f)\n',self.droprate);
             else
                 outString = 'false';
                 fprintf(fileID,'\tDropout: %s\n',outString);
+            end
+            
+            if self.optim.early
+                outString = 'true';
+                fprintf(fileID,'\tEarly: %s\n',outString);
+            else
+                outString = 'false';
+                fprintf(fileID,'\tEarly: %s\n',outString);
             end
             
             fclose(fileID);
@@ -359,7 +352,59 @@ classdef Network < handle
 
             self.trial = self.trial + 1;
             pause(1);
-        end
+        end %end function: timedReport
+
+        % reset the network
+        function reset(self)
+        % reset the network weights, biases, memory, oldDelta, errors,
+        % accuracy, and precision
+        
+            % reset weights and biases
+            switch self.transfer
+                case {'relu', 'leaky'}
+                    for i = 1:length(self.weights)
+                        self.weights{i} = randn(size(self.weights{i})) *...
+                            (2/sqrt(length(self.weights{i})));
+                        self.bias(i) = 1;
+                    end
+                case 'tanh'
+                    for i = 1:length(self.weights)
+                        self.weights{i} = randn(size(self.weights{i})) *...
+                            (1/sqrt(length(self.weights{i})));
+                        self.bias(i) = 1;
+                    end
+                otherwise
+                    layers =  length(self.weights);
+                    for i = 1:layers
+                        H1 = numel(self.weights{i});
+                        if i == 1
+                            H2 = H1;
+                        else
+                            H2 = numel(self.weights{i-1});
+                        end
+                        b = sqrt(6) / sqrt(H1 + H2);
+                        % if last layer
+                        if i == layers
+                            rows = length(unique(net.labels));
+                        else
+                            rows = length(self.weights{i+1});
+                        end
+                        columns = size(self.weights{i},1);
+                        self.weights{i} = -b + (2*b)*rand([rows columns]);
+                        self.bias(i) = 1;
+                    end
+            end % end switch
+            
+            % reset the rest
+            self.memory = {};
+            self.oldDeltas = {};
+            self.longmemory = {};
+            self.errors = [];
+            self.accuracy = [];
+            self.precision = [];
+            self.R2 = [];
+                
+        end % end function:  reset
         
         
     end % end methods section

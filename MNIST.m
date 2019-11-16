@@ -5,6 +5,16 @@ function [labels, images] = MNIST(data)
 % 
 % This function is custom made for NIST data converted into CSV format
 % which contains image labels as the first column.
+%
+% MNIST(data)
+% PARAMETERS
+% data : a csv data set containing MNIST data
+%
+% RETURN VALUES
+% labels : the single digit target label values
+% images : 28x28 numeric images normalized and transformed into a 1x784
+%          vector
+
 
 % get the dimensions of the data
 [rows, cols] = size(data);
@@ -21,7 +31,6 @@ fprintf('\nImages size: %d x %d pixels.\n',sz,sz);
 fprintf('Total number of images is %d.\n',length(labels));
 fprintf('\nPress any button to continue.\n');
 
-
 % get visual samples of the data
 colormap gray;
 clf;
@@ -31,9 +40,8 @@ for i = 1:step:rows
     imagesc(reshape(images(i,:),sz,sz)'),...
         title(['Target Label: ',num2str(labels(i)),...
         '   (Press any button to continue)'])
-%     pause();
+    pause();
 end
-
 
 %normalize image data
 images = images / 255;

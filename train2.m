@@ -1,4 +1,4 @@
-function [err, acc, prec] = train2(self)
+function [err, acc, prec, R2] = train2(self)
 %train executes feedforward, backpropagation, and updates the biases and
 % weights of neural network
 
@@ -24,10 +24,12 @@ function [err, acc, prec] = train2(self)
     runningError = [];
     runningAccuracy = [];
     runningPrecision = [];
+    runningR2 = [];
 
     epochError = [];
     epochAccuracy = [];
     epochPrecision = [];
+    epochR2 = [];
     
     % helper code for displaying percentage complete
     k = 2;
@@ -44,7 +46,7 @@ function [err, acc, prec] = train2(self)
         self.memory = {};
         input = self.images(sample,:);
         target = self.encodedLabels(sample,:);
-        label = self.labels(sample);
+        %label = self.labels(sample);
 
         % * * * * * * * * * * *
         %      FEEDFORWARD
@@ -72,8 +74,8 @@ function [err, acc, prec] = train2(self)
             end
         end % end of layers
         
-        tmpCell = mat2cell([prediction target],1,[10 10]);
-        self.longmemory = cat(1,tmpCell,self.longmemory);
+%         tmpCell = mat2cell([prediction target],1,[10 10]);
+%         self.longmemory = cat(1,tmpCell,self.longmemory);
         
         % * * * * * * * * * * * *
         % Calculate Error
@@ -129,11 +131,15 @@ function [err, acc, prec] = train2(self)
 
         acc = (TP + FP)/(FP + TP + FN + TN);
         prec = TP / (TP + FP);
+        SSE = sum((target - prediction).^2);
+        SST = sum((target - mean(self.encodedLabels).^2));
+        R2 = 1 - SSE/SST;
 
         % append precision, accuracy, and error
         runningPrecision = cat(1,prec,runningPrecision);
         runningAccuracy = cat(1,acc,runningAccuracy);
         runningError = cat(1,J,runningError);
+        runningR2 = cat(1,R2,runningR2);
 
         [w, b] = backprop2(self, prediction, target, self.images(sample,:));
         b = mean(b,2);
@@ -160,10 +166,12 @@ function [err, acc, prec] = train2(self)
             err = mean(runningError);
             acc = mean(runningAccuracy);
             prec = mean(runningPrecision);
+            R2 = mean(runningR2);
                         
             epochPrecision = cat(1,prec,epochPrecision);
             epochAccuracy = cat(1,acc,epochAccuracy);
             epochError = cat(1,err,epochError);
+            epochR2 = cat(1,R2,epochR2);
             
             update2(self, newWeights, newBias);
             
@@ -174,6 +182,7 @@ function [err, acc, prec] = train2(self)
             runningPrecision = [];
             runningAccuracy = [];
             runningError = [];
+            runningR2 = [];
         end
         
         % keep track of percentage done
@@ -194,9 +203,11 @@ function [err, acc, prec] = train2(self)
     err = mean(epochError);
     acc = mean(epochAccuracy);
     prec = mean(epochPrecision);
+    R2 = mean(epochR2);
     
     self.errors = cat(1,err,self.errors);
     self.accuracy = cat(1,acc,self.accuracy);
     self.precision = cat(1,prec,self.precision);
+    self.R2 = cat(1,R2,self.R2);
 
 end % end of function
