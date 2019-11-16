@@ -1,7 +1,7 @@
 # engr240_nn
 MATLAB based MLP
 This is the project for my Engineering Applications class for Fall 2019.
-Last update: 15 Nov 2019
+Last update: 16 Nov 2019
 
 NOTES:
 - Network: updated reporting, added split function
