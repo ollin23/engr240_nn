@@ -3,24 +3,11 @@ MATLAB based MLP
 This is the project for my Engineering Applications class for Fall 2019.
 Last update: 15 Nov 2019
 
-
-
-Updates:
-- fit2: updated with early stop, longmemory, r2, and more plots implementation
-- Network:
-    * properties added -
-        o trial - keeps track of trial runs (one trial = 1 set of training through all epochs)
-        o r2 - R-squared, stored per trial, tracked per epoch
-        o longmemory - history of output throughout a trial
-    * functions added -
-        o report() and timedReport() - generate text reports and save the network in a mat file
-        o reset() - resets the network to original parameters
-        o fit() - updated to include dropout option
-- train2: updated with longmemory property, optimizations tested
-- cost: updated with derivative parameter
-- pred: prediction function
-- normalize: function to normalize data
-- activate: minor documentation update
+NOTES:
+- Network: updated reporting, added split function
+- firstMenu: menu on start of program to choose dataset
+- improved R2 calculation. previous implementation increased the runtime 10x
+- other functions updated for compatibility
 
 
 Functions:
@@ -30,6 +17,7 @@ Functions:
 - createNetwork: initializes the neural net
 - displayNetworkDesign: allows user to numerically see how the network is designed
 - feedforward2: feedforward algorithm
+- firstMenu: first options for using project, choice of which dataset to use
 - fit2: wrapper function for training data; implements epoch cycles and graph
 - menu: menu to drive topology design
 - menuHyper: menu to drive hyperpamater tuning
@@ -37,6 +25,7 @@ Functions:
 - MNIST: splits the csv into label and image structures; shows user a sample of the images
 - sigmoid: sigmoid function
 - softmax: softmax function
+- split: splits data into training, validation, and testing sets
 - train2: trains the network, gathers loss and accuracy metrics
 - update2: updates network parameters
 
@@ -53,7 +42,25 @@ Files
 - feedforward: simple feedforward process(weights * input + data)
 - train: trains the neural net
 - update: update the weights and biases
-- fit: replaced with fit2
+- fit: replaced by fit2
+
+Notes, 15 Nov 2019
+- fit2: updated with early stop, longmemory, r2, and more plots implementation
+- Network:
+    * properties added -
+        o trial - keeps track of trial runs (one trial = 1 set of training through all epochs)
+        o r2 - R-squared, stored per trial, tracked per epoch
+        o longmemory - history of output throughout a trial
+    * functions added -
+        o report() and timedReport() - generate text reports and save the network in a mat file
+        o reset() - resets the network to original parameters
+        o fit() - updated to include dropout option
+- train2: updated with longmemory property, optimizations tested
+- cost: updated with derivative parameter
+- pred: prediction function
+- normalize: function to normalize data
+- activate: minor documentation update
+
 
 Notes, 12 Nov 2019
 - Changed optimization implementation. A struct was more useful than several independent variables.
