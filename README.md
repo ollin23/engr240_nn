@@ -15,18 +15,17 @@ MASSIVE GPU UPDATE, 17 Nov 2019
 - Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
 
 BOILERPLATE WORKFLOW<br/>
-<code>
-dd = firstMenu();                      % choose training data
-data = load(dd);                       % loads data into memory
-[labels, images] = MNIST(data);        % retrieves samples
-network = menuNetwork(images, labels); % builds network
-menuHyper(network);                    % tune hyperparameters
-network.split(.8,.2);                  % split the data into training and validation sets,
-                                         example: 80 training 20 validation
-network.fit();                         % train the network
-% not yet implemented   
-%network.test();                        % run the test data
-<code/>
+<code>dd = firstMenu();                      % choose training data<code/><br/>
+<code>data = load(dd);                       % loads data into memory<code/><br/>
+<code>[labels, images] = MNIST(data);        % retrieves samples<code/><br/>
+<code>network = menuNetwork(images, labels); % builds network<code/><br/>
+<code>menuHyper(network);                    % tune hyperparameters<code/><br/>
+<code>network.split(.8,.2);                  % split the data into training and validation sets,<code/><br/>
+<code>                                         example: 80 training 20 validation<code/><br/>
+<code>network.fit();                         % train the network<code/><br/>
+<code>% not yet implemented<code/><br/>
+<code>%network.test();                        % run the test data<code/><br/>
+<br/>
    
 Functions:
 - activate: activation functions
