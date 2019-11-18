@@ -15,7 +15,6 @@ function fit2(self)
         self.longmemory = {};        
         
         % reset time keepers
-        self.start = 0;
         self.stop = 0;
 
         % keep track of epochs
@@ -25,14 +24,15 @@ function fit2(self)
         fprintf('Epoch %d:         ',epoch);
         
         % start timer
-        self.start = tic;
+        tic;
         % train the network
         [err, acc, prec, R2] = train2(self);
         self.stop = toc;
+
         
         epochSummary(err, acc, prec, R2);
 
-        epochTime = epochTime + t;
+        epochTime = epochTime + self.stop;
         maxAcc = max(self.accuracy);
         maxPrec = max(self.precision);
         maxR2 = max(self.R2);
@@ -61,20 +61,17 @@ function fit2(self)
             if abs(acc - accAvg) < .02
                 break;
             end
-            
         end
-        
-        trainSummary(self, epochTime, ep);
-
     end % end epoch
 
+    % end of trial training summary
+    trainingSummary(self, epochTime, ep);
+    
     function epochSummary(err, acc, prec, R2)
         fprintf('\tError :\t\t\t%8.5f\n',err);
         fprintf('\tAccuracy :\t\t%8.5f\n',acc);
         fprintf('\tPrecision :\t\t%8.5f\n',prec);
         fprintf('\tR-squared :\t\t%8.5f\n',R2);
         fprintf('\tTime Elapsed:\t%8.5f\n',self.stop);
-        
     end
-
 end

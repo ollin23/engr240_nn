@@ -57,7 +57,6 @@ classdef Network < handle
                
         % other parameters
         fileName;           % name of file to save multiple trials
-        start;              % start time of epoch; MATLAB tic
         stop;               % end time of epoch; MATLAB toc
         GPU;                % boolean; enables GPU usage
                
@@ -95,7 +94,7 @@ classdef Network < handle
             net.accuracy = [];
             net.precision = [];
             net.R2 = [];
-            if self.GPU
+            if net.GPU
                 net.errors = gpuArray(net.errors);
                 net.accuracy = gpuArray(net.accuracy);
                 net.precision = gpuArray(net.precision);
