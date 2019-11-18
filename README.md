@@ -7,14 +7,14 @@ Last update: 18 Nov 2019
 MASSIVE GPU UPDATE, 17 Nov 2019
 - enabled GPU acceleration when applicable
 - files affected:
-   o ProjectMain
-   o Network
-   o createNetwork
-   o menuNetwork
-   o menuOptim
+   - ProjectMain
+   - Network
+   - createNetwork
+   - menuNetwork
+   - menuOptim
 - Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
 
-BOILERPLATE WORKFLOW
+BOILERPLATE WORKFLOW<br/>
 dd = firstMenu();      % choose training data<br/>
 data = load(dd);       % loads data into memory<br/>
 [labels, images] = MNIST(data);  % retrieves samples<br/>
