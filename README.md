@@ -4,28 +4,35 @@ This is the project for my Engineering Applications class for Fall 2019.
 Last update: 18 Nov 2019
 
 
-MASSIVE GPU UPDATE, 17 Nov 2019
+UPDATE, 18 Nov 2019
 - enabled GPU acceleration when applicable
 - files affected:
    - ProjectMain
    - Network
    - createNetwork
-   - menuNetwork
-   - menuOptim
-- Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
+- Upcoming:
+   + Considering ADAgrad and/or RMSProp
+   + Still working on plots for gradients, results
+   + Tweak early stop
+   + Add parallelization
+   + Modify for GPU acceleration improvement
 
 BOILERPLATE WORKFLOW<br/>
-<code>dd = firstMenu();                      </code>% choose training data<br/>
-<code>data = load(dd);                       </code>% loads data into memory<br/>
-<code>[labels, images] = MNIST(data);        % retrieves samples</code><br/>
-<code>network = menuNetwork(images, labels); % builds network</code><br>
-<code>menuHyper(network);                    % tune hyperparameters</code><br/>
-<code>network.split(.8,.2);                  % split the data into training and validation sets,</code><br/>
-<code>                                         example: 80 training 20 validation</code><br/>
-<code>network.fit();                         % train the network</code><br/>
-<code>% not yet implemented</code><br/>
-<code>%network.test();                        % run the test data</code><br/>
-<br/>
+<pre>
+   dd = firstMenu();                      % Step 1: choose training data<br>
+   data = load(dd);                       % Step 2: load data into memory
+   [labels, images] = MNIST(data);        % Step 3: separate images and labels
+   network = menuNetwork(images, labels); % Step 4: build network
+   menuHyper(network);                    % Step 5: set hyperparameters for this session
+   network.split(.8,.2);                  % Step 6: split the data into training and validation sets,
+                                          %         example: 80 training 20 validation
+   network.fit();                         % Step 7: train the network
+   % The below are not yet implemented
+   %network.test();                       % Step 8: run the test data
+
+   % Step 9: save and name the model
+   % Step 10: choose to run again, changing hyperparameters
+</pre>
    
 Functions:
 - activate: activation functions
@@ -85,12 +92,24 @@ Notes, 15 Nov 2019
 - pred: prediction function
 - normalize: function to normalize data
 - activate: minor documentation update
+
+Notes, 17  Nov 2019
+- enabled GPU acceleration when applicable
+- files affected:
+   - ProjectMain
+   - Network
+   - createNetwork
+   - menuNetwork
+   - menuOptim
+Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
+
 Notes, 12 Nov 2019
 - Changed optimization implementation. A struct was more useful than several independent variables.
 - Still in process of implementing two more gradient optimizations.
 - A menu to select optimization features will be added as well as options to save the
   visualizations generated at the end of training.
 - Designing prediction function to work non-training data.
+
 Notes, 11 Nov 2019:
 - massive update. Rewrote the backpropagation algorithm after encountering an intractable problem
   with the trajectory of the code base and the implementation of batches. This entailed the redesign
@@ -104,6 +123,7 @@ Notes, 11 Nov 2019:
 - regularization has yet to be implemented
 - still intend to fully implement OOP functions; currently receiving errors for all of them except the
   constructor function
+
 Notes, 8 Nov 2019:
 - fixed relu errors; still potentially unstable
 - fixed error history storage
