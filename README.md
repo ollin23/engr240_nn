@@ -1,14 +1,28 @@
 # engr240_nn
 MATLAB based MLP
 This is the project for my Engineering Applications class for Fall 2019.
-Last update: 16 Nov 2019
+Last update: 17 Nov 2019
 
-NOTES:
-- Network: updated reporting, added split function
-- firstMenu: menu on start of program to choose dataset
-- improved R2 calculation. previous implementation increased the runtime 10x
-- other functions updated for compatibility
+MASSIVE GPU UPDATE
+- enabled GPU acceleration when applicable
+- files affected:
+   o ProjectMain
+   o Network
+   o createNetwork
+   o menuNetwork
+   o menuOptim
+- Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
 
+BOILERPLATE WORKFLOW
+dd = firstMenu();      % choose training data
+data = load(dd);       % loads data into memory
+[labels, images] = MNIST(data);  % retrieves samples
+network = menuNetwork(images, labels); % builds network
+menuHyper(network);     % tune hyperparameters
+network.split(.8,.2);   % split the data into training and validation sets,
+                         example: 80 training 20 validation
+network.fit();          % train the network
+network.test();         % run the test data
 
 Functions:
 - activate: activation functions
@@ -27,6 +41,7 @@ Functions:
 - softmax: softmax function
 - split: splits data into training, validation, and testing sets
 - train2: trains the network, gathers loss and accuracy metrics
+- trainSummary: generates a training report
 - update2: updates network parameters
 
 Objects
@@ -36,6 +51,8 @@ Main Programs
 - GetAndConvertFiles: downloads and converts binary MNIST files to csv into "projects" subfolder of the current directory
 - ProjectMain: the main project file
 
+
+
 ARCHIVE
 Files
 - backprop: backprop algorithm
@@ -44,6 +61,11 @@ Files
 - update: update the weights and biases
 - fit: replaced by fit2
 
+Notes, 16 Nov 2019:
+- Network: updated reporting, added split function
+- firstMenu: menu on start of program to choose dataset
+- improved R2 calculation. previous implementation increased the runtime 10x
+- other functions updated for compatibility
 Notes, 15 Nov 2019
 - fit2: updated with early stop, longmemory, r2, and more plots implementation
 - Network:
@@ -60,15 +82,12 @@ Notes, 15 Nov 2019
 - pred: prediction function
 - normalize: function to normalize data
 - activate: minor documentation update
-
-
 Notes, 12 Nov 2019
 - Changed optimization implementation. A struct was more useful than several independent variables.
 - Still in process of implementing two more gradient optimizations.
 - A menu to select optimization features will be added as well as options to save the
   visualizations generated at the end of training.
 - Designing prediction function to work non-training data.
-
 Notes, 11 Nov 2019:
 - massive update. Rewrote the backpropagation algorithm after encountering an intractable problem
   with the trajectory of the code base and the implementation of batches. This entailed the redesign
@@ -82,7 +101,6 @@ Notes, 11 Nov 2019:
 - regularization has yet to be implemented
 - still intend to fully implement OOP functions; currently receiving errors for all of them except the
   constructor function
-
 Notes, 8 Nov 2019:
 - fixed relu errors; still potentially unstable
 - fixed error history storage
