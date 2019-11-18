@@ -72,7 +72,7 @@ classdef Network < handle
                 GPU = false;
             end
             net.GPU = GPU;
-            [w, b] = createNetwork(layers);
+            [w, b] = createNetwork(layers, net.GPU);
 
             % internal parameters
             net.weights = w;
