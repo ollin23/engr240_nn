@@ -1,5 +1,7 @@
-function [] = fit2(self)
-%fit executes the training cycle
+function fit2(self)
+%fit2 executes the training cycle
+%
+%fit2 takes only the network as the parameter self
 %
     ep = 0;
     %x = 1:self.epochs;
@@ -9,29 +11,26 @@ function [] = fit2(self)
     %   Begin Training Cycles/Epochs
     % * * * * * * * * * * * * * * * * * *
     for epoch = 1:self.epochs
+        % reset longmemory
+        self.longmemory = {};        
         
+        % reset time keepers
+        self.start = 0;
+        self.stop = 0;
+
+        % keep track of epochs
         ep = ep + 1;
         
         % continuous update on epoch percent complete
         fprintf('Epoch %d:         ',epoch);
         
         % start timer
-        tic;
+        self.start = tic;
         % train the network
         [err, acc, prec, R2] = train2(self);
-        t = toc;
+        self.stop = toc;
         
-%         % calculate rolling R2
-%         yhat = cell2mat(self.longmemory(:,1));
-%         tgt = cell2mat(self.longmemory(:,2));
-%         tempR2 = cat(1,calculateR2(yhat,tgt),tempR2);
-        
-        fprintf('\tError :       %0.5f\n',err);
-        fprintf('\tAccuracy :    %0.5f\n',acc);
-        fprintf('\tPrecision :   %0.5f\n',prec);
-        fprintf('\tR-squared :   %0.5f\n',R2);
-        
-        fprintf('\tTime Elapsed: %0.5f\n',t);
+        epochSummary(err, acc, prec, R2);
 
         epochTime = epochTime + t;
         maxAcc = max(self.accuracy);
@@ -64,41 +63,18 @@ function [] = fit2(self)
             end
             
         end
+        
+        trainSummary(self, epochTime, ep);
 
     end % end epoch
-    
-%     % calculate R2
-%     self.r2 = tempR2(1);
 
-    % * * * * * * * * * * *
-    %   Display Results
-    % * * * * * * * * * * *
-    set(gcf, 'Position', [50 30 700 500]);
-    y1 = flip(self.errors);
-    y2 = flip(self.R2);
-    y3 = flip(self.accuracy);
-    y4 = flip(self.precision);
-    x = 1:ep;
-  
-    subplot(2,2,1)
-    plot(x,y1),xlabel('Epochs'),ylabel('Error');
-    title([self.costFunction,' Error Over ',num2str(ep),' Epochs']);
-    
-    subplot(2,2,2)
-    plot(x,y2),xlabel('Epochs'),ylabel('R^2');
-    title(['R^2 Over ',num2str(ep),' Epochs']);
+    function epochSummary(err, acc, prec, R2)
+        fprintf('\tError :\t\t\t%8.5f\n',err);
+        fprintf('\tAccuracy :\t\t%8.5f\n',acc);
+        fprintf('\tPrecision :\t\t%8.5f\n',prec);
+        fprintf('\tR-squared :\t\t%8.5f\n',R2);
+        fprintf('\tTime Elapsed:\t%8.5f\n',self.stop);
+        
+    end
 
-    subplot(2,2,3)
-    plot(x,y3),xlabel('Epochs'),ylabel('Accuracy');
-    title(['Accuracy Over ',num2str(ep),' Epochs']);
-    
-    subplot(2,2,4)
-    plot(x,y4),xlabel('Epochs'),ylabel('Precision');
-    title(['Precision Over ',num2str(ep),' Epochs']);
-    
-    % create a report
-    self.timedReport(epochTime, ep);
-
-    % reset longmemory
-    self.longmemory = {};
 end

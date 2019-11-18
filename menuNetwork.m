@@ -3,12 +3,22 @@ function [net] = menuNetwork(images, labels)
 %
 %PARAMETERS
 % images - the image dataset to analyze
+% labels - image labels
+% GPU - boolean; enables or disables GPU utilization when applicable
 %
 %OUTPUT
 % net - the basic neural net
 
+    try
+        GPU = true;
+        arbitrary = gpuArray(1);
+    catch
+        disp('This system cannot use GPU acceleration.');
+        disp('Performance will be negatively affected.');
+        GPU = false;
+    end
     % get size of output vector
-    [sampleCount, imgSize] = size(images);
+    [~, imgSize] = size(images);
     nodes = imgSize;
     outputCount = length(unique(labels));
 
@@ -36,7 +46,7 @@ function [net] = menuNetwork(images, labels)
     end
 
     % create network
-    net = Network(layers);
+    net = Network(layers, GPU);
 
     % display the network topology
     displayNetworkDesign(layers);
@@ -45,9 +55,16 @@ function [net] = menuNetwork(images, labels)
 
     % encode the labels
     % add network metric parameters
-    net.encodedLabels = oneHotEncoding(labels);
-    net.images = images;
-    net.labels = labels;
+    if net.GPU
+        enc = oneHotEncoding(labels);
+        net.encodedLabels = gpuArray(enc);
+        net.images = gpuArray(images);
+        net.labels = gpuArray(labels);
+    else
+        net.encodedLabels = oneHotEncoding(labels);
+        net.images = images;
+        net.labels = labels;
+    end
 
     %randomize images
     [r,~] = size(net.images);

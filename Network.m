@@ -57,17 +57,21 @@ classdef Network < handle
                
         % other parameters
         fileName;           % name of file to save multiple trials
+        start;              % start time of epoch; MATLAB tic
+        stop;               % end time of epoch; MATLAB toc
+        GPU;                % boolean; enables GPU usage
                
     end
     methods
         % constructor 
-        function net = Network(layers)
+        function net = Network(layers, GPU)
             if nargin == 0
                 % can change to generalize; this specific design is for
                 % treatment of the MNIST handwritten numbers dataset
                 layers = [784, 38, 16, 10];
+                GPU = false;
             end
-            
+            net.GPU = GPU;
             [w, b] = createNetwork(layers);
 
             % internal parameters
@@ -79,7 +83,11 @@ classdef Network < handle
             
             % allocate space for oldDeltas
             for i = 1:length(w)
-                net.oldDeltas{i} = zeros(size(w{i}));
+                if net.GPU
+                    net.oldDeltas{i} = zeros(size(w{i}),'gpuArray');
+                else
+                    net.oldDeltas{i} = zeros(size(w{i}));
+                end
             end
             
             % metric parameters
@@ -87,6 +95,12 @@ classdef Network < handle
             net.accuracy = [];
             net.precision = [];
             net.R2 = [];
+            if self.GPU
+                net.errors = gpuArray(net.errors);
+                net.accuracy = gpuArray(net.accuracy);
+                net.precision = gpuArray(net.precision);
+                net.R2 = gpuArray(net.R2);
+            end
             
             % image parameters
             net.images = [];
@@ -100,8 +114,15 @@ classdef Network < handle
             net.mu = .5;
             net.batches = 64;
             net.droprate = .8;
-            
             net.trial = 1;
+            if net.GPU
+                net.epochs = gpuArray(net.epochs);
+                net.eta = gpuArray(net.eta);
+                net.lambda = gpuArray(net.lambda);
+                net.mu = gpuArray(net.mu);
+                net.batches = gpuArray(net.batches);
+                net.droprate = gpuArray(net.droprate);
+            end
         end
 
         % prediction function
@@ -124,17 +145,27 @@ classdef Network < handle
                     % neurons proportionately to droprate
                     self.weights{i} = self.weights{i} .* self.dropmask{i};
                     self.weights{i} = self.weights{i} / self.droprate;
+                    if self.GPU
+                        self.weights{i} = gpuArray(self.weights{i});
+                    end
                 end
             end
+            
             fit2(self);
         end
 
         function split(self, trainSize, valSize, testSize)
             [trainSet, valSet, testSet] =...
                 split(self.images, trainSize, valSize, testSize);
-            self.training = trainSet;
-            self.val = valSet;
-            self.test = testSet;
+            if self.GPU
+                self.training = gpuArray(trainSet);
+                self.val = gpuArray(valSet);
+                self.test = gpuArray(testSet);
+            else
+                self.training = trainSet;
+                self.val = valSet;
+                self.test = testSet;
+            end
         end
         
         % generate a report without time elapsed
@@ -170,6 +201,12 @@ classdef Network < handle
             fprintf(fileID,'Transfer function:  %d\n',self.transfer);
             fprintf(fileID,'Output function:  %d\n',self.lastLayer);
             fprintf(fileID,'Cost function:  %d\n',self.costFunction);
+            if self.GPU
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'GPU acceleration: %s\n',outString);
             
             fprintf(fileID,'* Optimization schema *\n');
             if self.optim.none
@@ -284,7 +321,12 @@ classdef Network < handle
             fprintf(fileID,'Transfer function:  %s\n',self.transfer);
             fprintf(fileID,'Output function:  %s\n',self.lastLayer);
             fprintf(fileID,'Cost function:  %s\n',self.costFunction);
-            
+            if self.GPU
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'GPU acceleration: %s\n',outString);
             fprintf(fileID,'* Optimization schema *\n');
             if self.optim.none
                 outString = 'true';
@@ -351,7 +393,6 @@ classdef Network < handle
             savefig(figureName);
 
             self.trial = self.trial + 1;
-            pause(1);
         end %end function: timedReport
 
         % reset the network
@@ -392,6 +433,10 @@ classdef Network < handle
                         columns = size(self.weights{i},1);
                         self.weights{i} = -b + (2*b)*rand([rows columns]);
                         self.bias(i) = 1;
+                        if self.GPU
+                            self.weights{i} = gpuArray(self.weights{i});
+                            self.bias(i) = gpuArray(self.bias(i));
+                        end
                     end
             end % end switch
             
@@ -403,9 +448,14 @@ classdef Network < handle
             self.accuracy = [];
             self.precision = [];
             self.R2 = [];
+            if self.GPU
+                self.errors = gpuArray(self.errors);
+                self.accuracy = gpuArray(self.accuracy);
+                self.precision = gpuArray(self.precision);
+                self.R2 = gpuArray(self.R2);
+            end
                 
-        end % end function:  reset
-        
+        end % end function: reset
         
     end % end methods section
     

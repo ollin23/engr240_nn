@@ -4,6 +4,7 @@ function [err, acc, prec, R2] = train2(self)
 
     % size of the sample set
     [sampleSize,~] = size(self.images);
+    ybar = mean(self.encodedLabels);
 
     % determine batch size
     % self.batches == 0, then batchSize == 1 , Stochastic Gradient Descent
@@ -74,8 +75,7 @@ function [err, acc, prec, R2] = train2(self)
             end
         end % end of layers
         
-%         tmpCell = mat2cell([prediction target],1,[10 10]);
-%         self.longmemory = cat(1,tmpCell,self.longmemory);
+        self.longmemory = cat(1,prediction,self.longmemory);
         
         % * * * * * * * * * * * *
         % Calculate Error
@@ -104,7 +104,6 @@ function [err, acc, prec, R2] = train2(self)
                     % sum(cellfun(@(x)sum(x(:).^2),self.weights));
             end
         end
-        
 
         % calculate accuracy and precision
         p = round(normalize(prediction));
@@ -132,7 +131,7 @@ function [err, acc, prec, R2] = train2(self)
         acc = (TP + FP)/(FP + TP + FN + TN);
         prec = TP / (TP + FP);
         SSE = sum((target - prediction).^2);
-        SST = sum((target - mean(self.encodedLabels).^2));
+        SST = sum((target - ybar.^2));
         R2 = 1 - SSE/SST;
 
         % append precision, accuracy, and error
