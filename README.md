@@ -15,8 +15,8 @@ MASSIVE GPU UPDATE, 17 Nov 2019
 - Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
 
 BOILERPLATE WORKFLOW<br/>
-<code>dd = firstMenu();                      % choose training data</code><br/>
-<code>data = load(dd);                       % loads data into memory</code><br/>
+<code>dd = firstMenu();                      </code>% choose training data<br/>
+<code>data = load(dd);                       </code>% loads data into memory<br/>
 <code>[labels, images] = MNIST(data);        % retrieves samples</code><br/>
 <code>network = menuNetwork(images, labels); % builds network</code><br>
 <code>menuHyper(network);                    % tune hyperparameters</code><br/>
