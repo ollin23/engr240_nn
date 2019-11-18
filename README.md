@@ -1,9 +1,10 @@
 # engr240_nn
 MATLAB based MLP
 This is the project for my Engineering Applications class for Fall 2019.
-Last update: 17 Nov 2019
+Last update: 18 Nov 2019
 
-MASSIVE GPU UPDATE
+
+MASSIVE GPU UPDATE, 17 Nov 2019
 - enabled GPU acceleration when applicable
 - files affected:
    o ProjectMain
@@ -14,15 +15,15 @@ MASSIVE GPU UPDATE
 - Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
 
 BOILERPLATE WORKFLOW
-dd = firstMenu();      % choose training data
-data = load(dd);       % loads data into memory
-[labels, images] = MNIST(data);  % retrieves samples
-network = menuNetwork(images, labels); % builds network
-menuHyper(network);     % tune hyperparameters
-network.split(.8,.2);   % split the data into training and validation sets,
-                         example: 80 training 20 validation
-network.fit();          % train the network
-network.test();         % run the test data
+dd = firstMenu();      % choose training data<br/>
+data = load(dd);       % loads data into memory<br/>
+[labels, images] = MNIST(data);  % retrieves samples<br/>
+network = menuNetwork(images, labels); % builds network<br/>
+menuHyper(network);     % tune hyperparameters<br/>
+network.split(.8,.2);   % split the data into training and validation sets,<br/>
+                         example: 80 training 20 validation<br/>
+network.fit();          % train the network<br/>
+network.test();         % run the test data<br/>
 
 Functions:
 - activate: activation functions
