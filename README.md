@@ -24,7 +24,8 @@ BOILERPLATE WORKFLOW<br/>
    [labels, images] = MNIST(data);        % Step 3: separate images and labels
    network = menuNetwork(images, labels); % Step 4: build network
    menuHyper(network);                    % Step 5: set hyperparameters for this session
-   network.split(.8,.2);                  % Step 6: split the data into training and validation sets,
+   % not fully implemented
+   %network.split(.8,.2);                  % Step 6: split the data into training and validation sets,
                                           %         example: 80 training 20 validation
    network.fit();                         % Step 7: train the network
    
