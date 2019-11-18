@@ -27,9 +27,9 @@ BOILERPLATE WORKFLOW<br/>
    network.split(.8,.2);                  % Step 6: split the data into training and validation sets,
                                           %         example: 80 training 20 validation
    network.fit();                         % Step 7: train the network
+   
    % The below are not yet implemented
    %network.test();                       % Step 8: run the test data
-
    % Step 9: save and name the model
    % Step 10: choose to run again, changing hyperparameters
 </pre>
@@ -101,7 +101,7 @@ Notes, 17  Nov 2019
    - createNetwork
    - menuNetwork
    - menuOptim
-Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
+- Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
 
 Notes, 12 Nov 2019
 - Changed optimization implementation. A struct was more useful than several independent variables.
