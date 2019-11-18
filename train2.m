@@ -75,7 +75,8 @@ function [err, acc, prec, R2] = train2(self)
             end
         end % end of layers
         
-        self.longmemory = cat(1,prediction,self.longmemory);
+        p2 = gather(prediction);
+        self.longmemory = cat(1,p2,self.longmemory);
         
         % * * * * * * * * * * * *
         % Calculate Error

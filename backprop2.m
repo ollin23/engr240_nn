@@ -52,6 +52,7 @@ for layer = layers:-1:1
     end
     
     weightDelta{layer} = delta;
+    deltaBias = gather(deltaBias);
     biasDelta(layer) = deltaBias;
     
     % store delta for use with momentum in next sample

@@ -58,20 +58,19 @@ classdef Network < handle
         % other parameters
         fileName;           % name of file to save multiple trials
         stop;               % end time of epoch; MATLAB toc
-        GPU;                % boolean; enables GPU usage
+        GPU;                % boolean; if GPU is available
+        threshold;          % early stop threshold
                
     end
     methods
         % constructor 
-        function net = Network(layers, GPU)
+        function net = Network(layers)
             if nargin == 0
                 % can change to generalize; this specific design is for
                 % treatment of the MNIST handwritten numbers dataset
                 layers = [784, 38, 16, 10];
-                GPU = false;
             end
-            net.GPU = GPU;
-            [w, b] = createNetwork(layers, net.GPU);
+            [w, b] = createNetwork(layers);
 
             % internal parameters
             net.weights = w;
@@ -82,11 +81,7 @@ classdef Network < handle
             
             % allocate space for oldDeltas
             for i = 1:length(w)
-                if net.GPU
-                    net.oldDeltas{i} = zeros(size(w{i}),'gpuArray');
-                else
-                    net.oldDeltas{i} = zeros(size(w{i}));
-                end
+                net.oldDeltas{i} = zeros(size(w{i}));
             end
             
             % metric parameters
@@ -94,12 +89,6 @@ classdef Network < handle
             net.accuracy = [];
             net.precision = [];
             net.R2 = [];
-            if net.GPU
-                net.errors = gpuArray(net.errors);
-                net.accuracy = gpuArray(net.accuracy);
-                net.precision = gpuArray(net.precision);
-                net.R2 = gpuArray(net.R2);
-            end
             
             % image parameters
             net.images = [];
@@ -114,14 +103,7 @@ classdef Network < handle
             net.batches = 64;
             net.droprate = .8;
             net.trial = 1;
-            if net.GPU
-                net.epochs = gpuArray(net.epochs);
-                net.eta = gpuArray(net.eta);
-                net.lambda = gpuArray(net.lambda);
-                net.mu = gpuArray(net.mu);
-                net.batches = gpuArray(net.batches);
-                net.droprate = gpuArray(net.droprate);
-            end
+
         end
 
         % prediction function
@@ -132,7 +114,10 @@ classdef Network < handle
 %         end
         
         % executes training cycles
-        function fit(self)
+        function fit(self, GPUenabled)
+        % executes training cycles
+        
+            self.enableGPUacceleration(GPUenabled);
             
             % if dropout active, create dropout mask
             if self.optim.dropout && ~self.optim.none
@@ -149,10 +134,58 @@ classdef Network < handle
                     end
                 end
             end
-            
+
             fit2(self);
         end
+        
+        function enableGPUacceleration(self, enable)
+        %enableGPUacceleration tests GPU available and gives the user an option to
+        %use it or not
 
+            % test for GPU access
+            try
+                self.GPU = true;
+                gpuArray(1);
+            catch
+                self.GPU = false;
+                disp('This system cannot use GPUs for data processing in MATLAB.');
+            end
+
+            if self.GPU && (enable == false)
+                fprintf('GPU usage is disabled for this session.\n\n');
+            end
+             % enable GPU acceleration
+            if self.GPU && enable
+                disp('Enabling GPU acceleration...');
+                for i = 1:length(self.weights)
+                    fprintf('Creating gpuArray for weights, layer %d\n',i);
+                    pause(.05);
+                    self.weights{i} = gpuArray(self.weights{i});
+                end
+
+                self.encodedLabels = gpuArray(self.encodedLabels);
+                fprintf('Creating gpuArray encodedLabels\n');
+                pause(.05);
+
+%                 self.images = gpuArray(self.images);
+%                 self.labels = gpuArray(self.labels);
+%                 for i = 1:length(self.oldDeltas)
+%                     self.oldDeltas{i} = gpuArray(self.oldDeltas{i});
+%                 end
+%                 self.errors = gpuArray(self.errors);
+%                 self.accuracy = gpuArray(self.accuracy);
+%                 self.precision = gpuArray(self.precision);
+%                 self.R2 = gpuArray(self.R2);
+%                 self.epochs = gpuArray(self.epochs);
+%                 self.eta = gpuArray(self.eta);
+%                 self.lambda = gpuArray(self.lambda);
+%                 self.mu = gpuArray(self.mu);
+%                 self.droprate = gpuArray(self.droprate);
+            end
+        end
+
+        
+        
         function split(self, trainSize, valSize, testSize)
             [trainSet, valSet, testSet] =...
                 split(self.images, trainSize, valSize, testSize);
