@@ -16,17 +16,18 @@ MASSIVE GPU UPDATE, 17 Nov 2019
 
 BOILERPLATE WORKFLOW<br/>
 <code>
-dd = firstMenu();                      % choose training data<br/>
-data = load(dd);                       % loads data into memory<br/>
-[labels, images] = MNIST(data);        % retrieves samples<br/>
-network = menuNetwork(images, labels); % builds network<br/>
-menuHyper(network);                    % tune hyperparameters<br/>
-network.split(.8,.2);                  % split the data into training and validation sets,<br/>
-                                         example: 80 training 20 validation<br/>
-network.fit();                         % train the network<br/>
+dd = firstMenu();                      % choose training data
+data = load(dd);                       % loads data into memory
+[labels, images] = MNIST(data);        % retrieves samples
+network = menuNetwork(images, labels); % builds network
+menuHyper(network);                    % tune hyperparameters
+network.split(.8,.2);                  % split the data into training and validation sets,
+                                         example: 80 training 20 validation
+network.fit();                         % train the network
 % not yet implemented   
-%network.test();                        % run the test data<br/>
+%network.test();                        % run the test data
 <code/>
+   
 Functions:
 - activate: activation functions
 - backprop2: backpropagation algorithm
