@@ -15,16 +15,18 @@ MASSIVE GPU UPDATE, 17 Nov 2019
 - Upcoming: ADAgrad and/or RMSProp. Still working on graphing the gradients.
 
 BOILERPLATE WORKFLOW<br/>
-dd = firstMenu();      % choose training data<br/>
-data = load(dd);       % loads data into memory<br/>
-[labels, images] = MNIST(data);  % retrieves samples<br/>
+<code>
+dd = firstMenu();                      % choose training data<br/>
+data = load(dd);                       % loads data into memory<br/>
+[labels, images] = MNIST(data);        % retrieves samples<br/>
 network = menuNetwork(images, labels); % builds network<br/>
-menuHyper(network);     % tune hyperparameters<br/>
-network.split(.8,.2);   % split the data into training and validation sets,<br/>
-                         example: 80 training 20 validation<br/>
-network.fit();          % train the network<br/>
-network.test();         % run the test data<br/>
-
+menuHyper(network);                    % tune hyperparameters<br/>
+network.split(.8,.2);                  % split the data into training and validation sets,<br/>
+                                         example: 80 training 20 validation<br/>
+network.fit();                         % train the network<br/>
+% not yet implemented   
+%network.test();                        % run the test data<br/>
+<code/>
 Functions:
 - activate: activation functions
 - backprop2: backpropagation algorithm
