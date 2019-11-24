@@ -1,3 +1,4 @@
+ 
 clear;
 clc;
 %* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -22,8 +23,12 @@ if strcmp(answer,'y')
      'http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz';
      'http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz'};
     
-    %unzip binary data file into \project subfolder in the current directory
-     folder = [pwd '\project'];
+    %unzip binary data file into project subfolder in the current directory
+    if ispc
+        folder = [pwd '\project'];
+    else
+        folder = [pwd '/project'];
+    end
     endFiles = {'train_images';
                 'train_labels';
                 'test_images';
@@ -34,7 +39,11 @@ if strcmp(answer,'y')
     metadata = [];
     for i = 1:size(fileArray,1)
          temp = char(gunzip(fileArray{i}, folder));
-         endPoint = [folder '\' endFiles{i}];
+         if ispc
+             endPoint = [folder '\' endFiles{i}];
+         else
+             endPoint = [folder '/' endFiles{i}];
+         end
          movefile(temp, endPoint);
         
         % open binary files. the metadata is uint32; the image and label data 
@@ -69,7 +78,7 @@ if strcmp(answer,'y')
     
     % calculates necessary dimensions for image vectors
     % and creates them
-    for i = 1:length(metadata)
+    for i = 1:length(metadata) 
         rows = metadata(i,2);
         sz = (metadata(i,3) * metadata(i,4));
         cols = sz + 1;
@@ -126,9 +135,14 @@ if strcmp(answer,'y')
     fprintf('Training data size: %d %d\n',size(train_data));
     fprintf('Test data size: %d %d\n',size(test_data));
     
-    training = [folder '\train_data.csv'];
-    testing = [folder '\test_data.csv'];
-    
+    if ispc
+        training = [folder '\train_data.csv'];
+        testing = [folder '\test_data.csv'];
+    else
+        training = [folder '/train_data.csv'];
+        testing = [folder '/test_data.csv'];
+    end
+        
     % determine the version of MATLAB
     v = ver;
     for k = 1:length(v)
