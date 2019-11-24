@@ -61,7 +61,11 @@ end
     fprintf('<<< Press any key to continue >>>\n');
     pause();
 
-datadir = [pwd '\project\' tmpFile];
+    if ispc
+        datadir = [pwd '\project\' tmpFile];
+    else
+        datadir = [pwd '/project/' tmpFile];
+    end
 
 
     function intro
