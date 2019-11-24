@@ -86,25 +86,34 @@ if strcmp(answer,'y')
                         '   Test data   \n'...
                         '* * * * * * * *\n']);            
             end
-            fprintf('Percent complete:     ');
+            fprintf('Percent complete:      %%');
             headers = [datafiles{i+1}];
+
+            k = 1;
+            if rows > 10000
+                k = rows / 10000;
+            end
+            
+            tic;
             for r = 1:rows
                 outfile(r,:) = [datafiles{i}(first:last)];
                 first = first + sz;
                 last = last + sz;
                 
                 % keep track of percentage done
-                percent = 100 * (r/rows);
-                strPer = [num2str(percent) '%%'];
-                if percent < 100
-                    strCR = [repmat('\b',1,length(strPer)-1)];
-                else
-                    strCR = [repmat('\b',1,length(strPer)-1) '\b\b'];
-                    strPer = [strPer '\n'];
+                if mod(r,k) == 0
+                    percent = 100 * (r/rows);
+                    strPer = [num2str(percent) '%%'];
+                    if percent < 100
+                        strCR = [repmat('\b',1,length(strPer)-1)];
+                    else
+                        strCR = [repmat('\b',1,length(strPer)-1) '\b\b'];
+                        strPer = [strPer '\n'];
+                    end
+                    fprintf([strCR strPer]);
                 end
-                fprintf([strCR strPer]);
             end
-            
+            fprintf('\n\nTime elapsed for parsing: %0.2f sec\n\n',toc);
             % store in datasets in vectors to translate into csv files
             if i == 1
                 train_data = [headers outfile];
