@@ -26,6 +26,9 @@ for layer = layers:-1:1
             a = activate(self.memory{layer-1},self.transfer,false);
         end
     end
+%     fprintf('layers %d\n',layer);
+%     fprintf('size(gradient) = %d %d\n',size(gradient));
+%     fprintf('size(a) = %d %d\n',size(a));
     
     delta = gradient' * a;
     deltaBias = mean(mean(gradient') * self.bias(layer));

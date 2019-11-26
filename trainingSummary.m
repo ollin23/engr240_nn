@@ -1,4 +1,4 @@
-function trainingSummary(self, epochTime, ep)
+function trainingSummary(self, epochTime, ep, backup)
     % * * * * * * * * * * *
     %   Display Results
     % * * * * * * * * * * *
@@ -25,6 +25,6 @@ function trainingSummary(self, epochTime, ep)
     plot(x,y4),xlabel('Epochs'),ylabel('Precision');
     title(['Precision Over ',num2str(ep),' Epochs']);
 
-    self.timedReport(epochTime,ep);
+    self.timedReport(epochTime,ep,backup);
 
 end

@@ -38,7 +38,7 @@ fprintf('\n <<< Hyperparameter initialization >>> \n\n');
 % * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 % trial 1
 net.epochs = 500;
-net.eta = .001;
+net.eta = .00001;
 net.batches = 64;           % BGD= 0; SGD = 1, 
 net.lambda = .01;           % L1, L2 hyperparameter
 net.mu = .7;                % momentum sensitivity hyperparameter
@@ -49,72 +49,72 @@ net.optim.none = false;     % overrides all optimizations
 net.optim.lasso = false;
 net.optim.ridge = false;
 net.optim.momentum = false;
-net.optim.dropout = false;
+net.optim.dropout = true;
 net.optim.early = true;
-net.fit();
+net.fit(false);
 
 % trial 1.5
-net.reset();
-net.epochs = 500;
-net.eta = .001;
-net.batches = 64;           % BGD= 0; SGD = 1, 
-net.lambda = .01;           % L1, L2 hyperparameter
-net.mu = .7;                % momentum sensitivity hyperparameter
-net.transfer = 'leaky';       
-net.lastLayer = 'softmax';
-net.costFunction = 'mse';   
-net.optim.none = false;     % overrides all optimizations
-net.optim.lasso = false;
-net.optim.ridge = false;
-net.optim.momentum = false;
-net.optim.dropout = false;
-net.optim.early = false;
-net.fit();
-
-% give user opportunity to change defaults
-% menuHyper(net);
-% fprintf(' << Press any key to continue >>\n');
-% pause();
-
-%* * * * * * * * * * * * * * * * * * * * * * * * * *
-%          Section 3: Train the Network
-%* * * * * * * * * * * * * * * * * * * * * * * * * *
-% train the network
-%net.fit();
-
-%* * * * * * * * * * * * * * * * * * * * * * * * * *
-%        Section 4: Test
-%* * * * * * * * * * * * * * * * * * * * * * * * * *
-
-% data = load('test_data.csv');
-% fprintf('\nLoading Project data. Please wait a moment...\n');
-% datadir = [pwd '\project\test_data.csv'];
-% data = load(datadir);
-% split data file into images and labels
-% [tstLabels, tstImages] = MNIST(data);
-% net.images = tstImages
-% net.labels = tstLabels
-% net.predict()
-
-% trial 2
-net.reset();
-net.trial = net.trial + 1;
-net.epochs = 500;
-net.eta = .001;
-net.batches = 0;            % BGD= 0; SGD = 1, 
-net.lambda = .01;           % L1, L2 hyperparameter
-net.mu = .7;                % momentum sensitivity hyperparameter
-net.transfer = 'leaky';       
-net.lastLayer = 'softmax';
-net.costFunction = 'mse';   % 'cross' pairs with softmax
-net.optim.none = true;      % 'true' not very useful with tanh and softmax
-net.optim.lasso = false;
-net.optim.ridge = false;
-net.optim.momentum = false;
-net.optim.dropout = false;
-net.optim.early = false;
-
-net.fit();
+% net.reset();
+% net.epochs = 500;
+% net.eta = .001;
+% net.batches = 64;           % BGD= 0; SGD = 1, 
+% net.lambda = .01;           % L1, L2 hyperparameter
+% net.mu = .7;                % momentum sensitivity hyperparameter
+% net.transfer = 'leaky';       
+% net.lastLayer = 'softmax';
+% net.costFunction = 'mse';   
+% net.optim.none = false;     % overrides all optimizations
+% net.optim.lasso = false;
+% net.optim.ridge = false;
+% net.optim.momentum = false;
+% net.optim.dropout = false;
+% net.optim.early = false;
+% net.fit();
+% 
+% % give user opportunity to change defaults
+% % menuHyper(net);
+% % fprintf(' << Press any key to continue >>\n');
+% % pause();
+% 
+% %* * * * * * * * * * * * * * * * * * * * * * * * * *
+% %          Section 3: Train the Network
+% %* * * * * * * * * * * * * * * * * * * * * * * * * *
+% % train the network
+% %net.fit();
+% 
+% %* * * * * * * * * * * * * * * * * * * * * * * * * *
+% %        Section 4: Test
+% %* * * * * * * * * * * * * * * * * * * * * * * * * *
+% 
+% % data = load('test_data.csv');
+% % fprintf('\nLoading Project data. Please wait a moment...\n');
+% % datadir = [pwd '\project\test_data.csv'];
+% % data = load(datadir);
+% % split data file into images and labels
+% % [tstLabels, tstImages] = MNIST(data);
+% % net.images = tstImages
+% % net.labels = tstLabels
+% % net.predict()
+% 
+% % trial 2
+% net.reset();
+% net.trial = net.trial + 1;
+% net.epochs = 500;
+% net.eta = .001;
+% net.batches = 0;            % BGD= 0; SGD = 1, 
+% net.lambda = .01;           % L1, L2 hyperparameter
+% net.mu = .7;                % momentum sensitivity hyperparameter
+% net.transfer = 'leaky';       
+% net.lastLayer = 'softmax';
+% net.costFunction = 'mse';   % 'cross' pairs with softmax
+% net.optim.none = true;      % 'true' not very useful with tanh and softmax
+% net.optim.lasso = false;
+% net.optim.ridge = false;
+% net.optim.momentum = false;
+% net.optim.dropout = false;
+% net.optim.early = false;
+% 
+% net.fit();
 
 % % trial 3
 % net.reset();

@@ -10,9 +10,10 @@ function fit2(self)
     % * * * * * * * * * * * * * * * * * *
     %   Begin Training Cycles/Epochs
     % * * * * * * * * * * * * * * * * * *
-    for epoch = 1:self.epochs
+    maxEpochs = self.epochs;
+    for epoch = 1:maxEpochs
         % reset longmemory
-        self.longmemory = {};        
+        %self.longmemory = {};        
         
         % reset time keepers
         self.stop = 0;
@@ -26,7 +27,11 @@ function fit2(self)
         % start timer
         tic;
         % train the network
-        [err, acc, prec, R2] = train2(self);
+        if self.GPU
+            [err, acc, prec, R2] = accelTrain(self);
+        else
+            [err, acc, prec, R2] = train2(self);
+        end
         self.stop = toc;
 
         
@@ -40,16 +45,27 @@ function fit2(self)
         
         % early stop if accuracy slips past the threshold of 
         % achieved stats of the training cycle
-        if self.optim.early && epoch >= 100
+        if self.optim.early
             threshold = .95;
             if acc <= (maxAcc * threshold)
-                break
-            end
-            if   R2 <= (maxR2 * threshold)
-                break
-            end
-            if minError >= (minError * threshold)
                 break;
+            end
+            if R2 <= (maxR2 * threshold)
+                break;
+            end
+            if err >= (minError * threshold)
+                break;
+            end
+        end
+        
+        % periodic backup
+        if length(self.images) >= 10000
+            if mod(ep,25) == 0
+                trainingSummary(self, epochTime,ep,true);
+            end
+        else
+            if mod(ep,50) == 0
+                trainingSummary(self,epochTime,ep,true);
             end
         end
         
@@ -62,10 +78,10 @@ function fit2(self)
                 break;
             end
         end
-    end % end epoch
+     end % end epoch
 
     % end of trial training summary
-    trainingSummary(self, epochTime, ep);
+    trainingSummary(self, epochTime, ep, false);
     
     function epochSummary(err, acc, prec, R2)
         fprintf('\tError :\t\t\t%8.5f\n',err);

@@ -47,6 +47,8 @@ classdef Network < handle
         %           (2)ADAgrad, and RMSprop are mutually exclusive
         optim = ...
             struct('none', true,...     % no optimizations used
+                   'GPU', false,...     % use GPU acceleration
+                   'parallel', false,... % use parallelization
                    'ridge',false,...    % L1 regularization
                    'lasso',false,...    % L2 regularization
                    'momentum',false,... % enables gradient momentum
@@ -58,7 +60,6 @@ classdef Network < handle
         % other parameters
         fileName;           % name of file to save multiple trials
         stop;               % end time of epoch; MATLAB toc
-        GPU;                % boolean; if GPU is available
         threshold;          % early stop threshold
                
     end
@@ -95,7 +96,7 @@ classdef Network < handle
             net.labels = [];
             net.encodedLabels = [];
             
-            % hyperparameters
+            % defauls hyperparameters
             net.epochs = 300;
             net.eta = .0001;
             net.lambda = .01;
@@ -114,10 +115,10 @@ classdef Network < handle
 %         end
         
         % executes training cycles
-        function fit(self, GPUenabled)
+        function fit(self, enabled)
         % executes training cycles
         
-            self.enableGPUacceleration(GPUenabled);
+            self.enableAcceleration(enabled);
             
             % if dropout active, create dropout mask
             if self.optim.dropout && ~self.optim.none
@@ -129,16 +130,34 @@ classdef Network < handle
                     % neurons proportionately to droprate
                     self.weights{i} = self.weights{i} .* self.dropmask{i};
                     self.weights{i} = self.weights{i} / self.droprate;
-                    if self.GPU
+                    if self.GPU && enabled
                         self.weights{i} = gpuArray(self.weights{i});
                     end
                 end
             end
-
+            
+            if self.optim.parallel
+                try
+                    pool = gcp;
+                    if isempty(pool)
+                        pool = 0;
+                    else
+                        pool.NumWokers;
+                    end
+                catch
+                    self.optim.parallel = false;
+                    disp('MATLAB cannot run parallelization at this time.');
+                end
+            end
+            
             fit2(self);
+            
+            if self.optim.parallel
+                delete(pool);
+            end
         end
         
-        function enableGPUacceleration(self, enable)
+        function enableAcceleration(self, enable)
         %enableGPUacceleration tests GPU available and gives the user an option to
         %use it or not
 
@@ -153,22 +172,23 @@ classdef Network < handle
 
             if self.GPU && (enable == false)
                 fprintf('GPU usage is disabled for this session.\n\n');
+                self.GPU = false;
             end
              % enable GPU acceleration
             if self.GPU && enable
-                disp('Enabling GPU acceleration...');
-                for i = 1:length(self.weights)
-                    fprintf('Creating gpuArray for weights, layer %d\n',i);
-                    pause(.05);
-                    self.weights{i} = gpuArray(self.weights{i});
-                end
-
-                self.encodedLabels = gpuArray(self.encodedLabels);
-                fprintf('Creating gpuArray encodedLabels\n');
-                pause(.05);
-
-%                 self.images = gpuArray(self.images);
-%                 self.labels = gpuArray(self.labels);
+%                 disp('Enabling GPU acceleration...');
+%                 for i = 1:length(self.weights)
+%                     fprintf('Creating gpuArray for weights, layer %d\n',i);
+%                     pause(.05);
+%                     self.weights{i} = gpuArray((self.weights{i}));
+%                 end
+% 
+%                 self.encodedLabels = gpuArray((self.encodedLabels));
+%                 fprintf('Creating gpuArray encodedLabels\n');
+%                 pause(.05);
+% 
+%                 self.images = gpuArray((self.images));
+%                 self.labels = gpuArray((self.labels));
 %                 for i = 1:length(self.oldDeltas)
 %                     self.oldDeltas{i} = gpuArray(self.oldDeltas{i});
 %                 end
@@ -204,10 +224,17 @@ classdef Network < handle
         function report(self)
         % generate a report without the time elapsed recorded
 
+            if ~exist('Documents', 'dir')
+                mkdir('Documents');
+            end
             % the date time group (DTG) is the primary ID tag
             dtg = datestr(now,'yyyymmdd_HHMM');
             if self.trial == 1
-                self.fileName = [pwd '\Documents\session_' dtg '.txt'];
+                if ispc
+                    self.fileName = [pwd '\Documents\session_' dtg '.txt'];
+                else
+                    self.fileName = [pwd '/Documents/session_' dtg '.txt'];
+                end
                 fileID = fopen(self.fileName,'w');
             else
                 fileID = fopen(self.fileName,'a+');
@@ -303,7 +330,14 @@ classdef Network < handle
             
             fclose(fileID);
 
-            figureName = [pwd '\images\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+            if ~exist('images','dir')
+                mkdir('images');
+            end
+            if ispc
+                figureName = [pwd '\images\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+            else
+                figureName = [pwd '/images/' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+            end
             savefig(figureName);
 
             self.trial = self.trial + 1;
@@ -311,13 +345,20 @@ classdef Network < handle
         end % end function: report
         
         % generate a report with elapsed time
-        function timedReport(self, epochTime, ep)
+        function timedReport(self, epochTime, ep, backup)
         % generate a report with the time elapsed recorded
 
+            if ~exist('Documents', 'dir')
+                mkdir('Documents');
+            end
             % the date time group (DTG) is the primary ID tag
             dtg = datestr(now,'yyyymmdd_HHMM');
             if self.trial == 1
-                self.fileName = [pwd '\Documents\session_' dtg '.txt'];
+                if ispc
+                    self.fileName = [pwd '\Documents\session_' dtg '.txt'];
+                else
+                    self.fileName = [pwd '/Documents/session_' dtg '.txt'];
+                end
                 fileID = fopen(self.fileName,'w');
             else
                 fileID = fopen(self.fileName,'a+');
@@ -325,6 +366,12 @@ classdef Network < handle
             
             %save neural network
             fName = self.fileName(1:end-4);
+            
+            % save backups
+            if backup
+                fName = [fName '_BACKUP_epoch_' ep];
+            end
+
             networkName = [fName '_network_trial_' num2str(self.trial) '.mat'];
             
             class(networkName)
@@ -395,6 +442,7 @@ classdef Network < handle
             end
             fprintf(fileID,'\tADAgrad: %s\n',outString);
             
+            
             if self.optim.RMSprop
                 outString = 'true';
             else
@@ -421,7 +469,15 @@ classdef Network < handle
             
             fclose(fileID);
 
-            figureName = [pwd '\images\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+            % save figure
+            if ~exist('imagefolder','dir')
+                mkdir('images');
+            end
+            if ispc
+                figureName = [pwd '\imagefolder\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+            else
+                figureName = [pwd '/imagefolder/' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+            end
             savefig(figureName);
 
             self.trial = self.trial + 1;

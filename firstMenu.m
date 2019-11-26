@@ -33,17 +33,20 @@ while (finished == false)
         case 1
             tmpFile = 'train_data.csv';
             finished = true;
+
         case 2
             tmpFile = 'test_data.csv';
             finished = true;
+
         case 3
             tmpFile = 'samples1k.csv';            
             finished = true;
+
         case 4
             intro();
             fprintf('\n\n\n');
         case 0
-            fprintf('\nExiting the progrtam will exit MATLAB.\n');
+            fprintf('\nExiting the program will exit MATLAB.\n');
             raw_answer = input('Are you sure you want to exit?  (y/N) ','s');
             if length(raw_answer) < 1
                 answer = 'n';
@@ -67,7 +70,24 @@ end
         datadir = [pwd '/project/' tmpFile];
     end
 
-
+    % detect sample1k data file, create it if it doesn't exist
+    if isfile(datadir)
+        return;
+    else
+        tgtName = [pwd '/project/samples1k.csv'];
+        
+        if ispc
+            srcName = [pwd '\project\test_data.csv'];
+        else
+            srcName = [pwd '/project/test_data.csv'];
+        end
+        srcData = load(srcName);
+        idx = randperm(length(srcData), 1000);
+        data = srcData(idx,:);
+        writematrix(data,tgtName);
+    end
+    
+    
     function intro
       fprintf(['\nThis project is an undergraduate consideration of\n',...
          'the Multilayer Perceptron (MLP). The MLP is graph\n',...
@@ -109,5 +129,4 @@ end
       fprintf('<<< Press any key to continue >>>');
       pause();
     end
-
 end
