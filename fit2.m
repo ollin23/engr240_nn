@@ -27,10 +27,10 @@ function fit2(self)
         % start timer
         tic;
         % train the network
-        if self.GPU
-            [err, acc, prec, R2] = accelTrain(self);
+        if self.optim.parallel || self.optim.GPU
+            [err, acc, prec, recall, R2] = accelTrain(self);
         else
-            [err, acc, prec, R2] = train2(self);
+            [err, acc, prec, recall, R2] = train2(self);
         end
         self.stop = toc;
 
@@ -40,6 +40,7 @@ function fit2(self)
         epochTime = epochTime + self.stop;
         maxAcc = max(self.accuracy);
         maxPrec = max(self.precision);
+        maxRecall = max(self.recall);
         maxR2 = max(self.R2);
         minError = min(self.errors);
         
@@ -59,22 +60,22 @@ function fit2(self)
         end
         
         % periodic backup
-        if length(self.images) >= 10000
-            if mod(ep,25) == 0
+        if length(self.images.training) >= 10000
+            if mod(ep,10) == 0
                 trainingSummary(self, epochTime,ep,true);
             end
         else
-            if mod(ep,50) == 0
+            if mod(ep,20) == 0
                 trainingSummary(self,epochTime,ep,true);
             end
         end
         
-        % early stop if there over 5% of total epochs, there is less than a
-        % 2% change in major stats
-        threshold = self.epochs * .05;
-        if self.optim.early && epoch >= 100
-            accAvg = sum(self.accuracy(end-threshold:end))/threshold;
-            if abs(acc - accAvg) < .02
+        % early stop if there over 5% of total epochs, there is more than a
+        % 2% change in error in the wrong direction
+        %threshold = self.epochs * .05;
+        if self.optim.early && epoch >= 15
+            %errAvg = sum(self.errors(end-threshold:end))/threshold;
+            if err > 1.02*min(self.errors)
                 break;
             end
         end
@@ -84,10 +85,11 @@ function fit2(self)
     trainingSummary(self, epochTime, ep, false);
     
     function epochSummary(err, acc, prec, R2)
-        fprintf('\tError :\t\t\t%8.5f\n',err);
-        fprintf('\tAccuracy :\t\t%8.5f\n',acc);
-        fprintf('\tPrecision :\t\t%8.5f\n',prec);
-        fprintf('\tR-squared :\t\t%8.5f\n',R2);
+        fprintf('\tError :\t\t%8.5f\n',err);
+        fprintf('\tAccuracy :\t%8.5f\n',acc);
+        fprintf('\tPrecision :\t%8.5f\n',prec);
+        fprintf('\tRecall :\t%8.5f\n',recall);
+        fprintf('\tR-squared :\t%8.5f\n',R2);
         fprintf('\tTime Elapsed:\t%8.5f\n',self.stop);
     end
 end

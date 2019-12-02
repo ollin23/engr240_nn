@@ -1,6 +1,10 @@
 function [weights, bias] = createNetwork(layers)
 %createNetwork produces a fully connected a neural net
 %
+%USAGE
+%  layers = [784, 300, 150, 50, 10];
+%  [weights, biases] = createNetwork(layers);
+%
 %PARAMETERS
 % layers - number of nodes in each separate layer
 %

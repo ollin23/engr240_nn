@@ -12,7 +12,7 @@ for layer = layers:-1:1
         
     % last to output layer is different
     if layer == layers
-        gradient = prediction - target;
+        gradient = cost(self, prediction, target, true);
         h = self.memory{layer-1};
         a = activate(h,self.transfer,true);
     else
@@ -49,7 +49,7 @@ for layer = layers:-1:1
                 self.lambda * norm(self.weights{layer}.^2) / ...
                 numel(self.weights{layer});
         end
-        if self.optim.momentum
+        if self.optim.momentum && exist('self.oldDeltas', 'var')
             delta = delta + self.mu * self.oldDeltas{layer};
         end
     end

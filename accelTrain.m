@@ -1,10 +1,10 @@
-function [err, acc, prec, R2] = accelTrain(self)
+function [err, acc, prec, recall, R2] = accelTrain(self)
 %gpuTrain executes feedforward, backpropagation, and updates the biases and
 % weights of neural network
 
     % size of the sample set
-    [sampleSize,~] = size(self.images);
-    ybar = mean(self.encodedLabels);
+    [sampleSize,~] = size(self.images.training);
+    ybar = mean(self.images.tngEncLabels);
 
     % determine batch size
     % self.batches == 0, then batchSize == 1 , Stochastic Gradient Descent
@@ -25,11 +25,13 @@ function [err, acc, prec, R2] = accelTrain(self)
     runningError = [];
     runningAccuracy = [];
     runningPrecision = [];
+    runningRecall = [];
     runningR2 = [];
 
     epochError = [];
     epochAccuracy = [];
     epochPrecision = [];
+    epochRecall = [];
     epochR2 = [];
     
     % helper code for displaying percentage complete
@@ -39,143 +41,45 @@ function [err, acc, prec, R2] = accelTrain(self)
     end
     counter = 0;
     
+    inputs = self.images.training;
+    targets = self.images.tngEncLabels;
+    
     % * * * * * * * * * * * * * * * * * * * 
     % begin cycling through the samples
     % * * * * * * * * * * * * * * * * * * * 
     for sample = 1:sampleSize
         counter = counter + 1;
         self.memory = {};
-        target = self.encodedLabels(sample,:);
+        target = targets(sample,:);
+        input = inputs(sample,:);
         %label = self.labels(sample);
         
-        im = self.images(sample,:);
-        weights = self.weights;
-        bias = self.bias;
-        lastLayer = self.lastLayer;
-        transfer = self.transfer;
-        prediction = 0;
-        mem = {};
-
         % * * * * * * * * * * *
         %      FEEDFORWARD
         % * * * * * * * * * * *
-        for l = 1:layers
-    
-            if l == 1
-                h = im * weights{l}' + bias(l);
-            else
-                h = input * weights{l}' + bias(l);
-            end
-            
-            % activation/transfer of weighted data
-            if l == layers
-                transferFunction = lastLayer;
-            else
-                transferFunction = transfer;
-            end
-            switch transferFunction
-                case 'relu'
-                    a = h .* (h>0);
-
-                case 'leaky'
-                    a = h .* (h > 0) + .01*(h .* (h < 0));
-
-                case 'tanh'
-                    a = tanh(h);
-                    
-                case 'softmax'
-                    a = softmax(h);
-                    
-                case 'sigmoid'
-                    a = sigmoid(h);
-            end
-            
-            % save pre-transferred data in memory for backprop
-            mem{l} = h;
-            
-            % store output as next layers input
-            input = 0;
-            input = input + a;
-            
-            % save last layer output as prediction
-            if l == layers
-                prediction = a;
-            end
-        end % end of layers
-        
-        self.memory = mem;
-%        self.longmemory = cat(1,prediction,self.longmemory);
+        prediction = feedforward2(self, input);
         
         % * * * * * * * * * * * *
         % Calculate Error
         % * * * * * * * * * * * *
-        J = cost(self.costFunction, prediction, target, false);
-
-        if ~(self.optim.none)
-            if self.optim.lasso
-                L1norm = 0;
-                for w = 1:length(self.weights)
-                    L1norm = L1norm + norm(self.weights{w});
-                end
-                J = J + ...
-                    (self.lambda / numel(self.weights)) * ...
-                    L1norm;
-                    % sum(cellfun(@(x)sum(x(:)),self.weights));
-            end
-            if self.optim.ridge
-                L2norm = 0;
-                for w = 1:length(self.weights)
-                    L2norm = L2norm + norm(self.weights{w}.^2);
-                end
-                J = J + ...
-                    (self.lambda / length(self.labels)) * ...
-                    L2norm;
-                    % sum(cellfun(@(x)sum(x(:).^2),self.weights));
-            end
-        end
+        J = cost(self, prediction, target, false);
 
         % calculate accuracy and precision
-        p = round(normalize(prediction));
-        
-        % [~,c] = max(prediction);
-        % oPred = oneHotEncoding(1:length(target));
-        % p = oPred(c,:);
-
-        positives = nnz(p);
-        if positives > 0
-            diff = (target - p);
-            FP = nnz(diff<0);
-            FN = nnz(diff>0);
-            TN = sum(p == diff);
-            TP = abs(1-FN);
-            %pLabel = mod(find(p>0),length(target));
-        else
-            FP = 0;
-            TP = 0;
-            FN = 1;
-            TN = 9;
-            %pLabel = -1;
-        end
-
-        acc = (TP + FP)./(FP + TP + FN + TN);
-        prec = TP ./ (TP + FP);
-        %prec = sprintf('%4.2f+%4.2f', mean(self.errors), std(errors));
-        SSE = sum((target - prediction).^2);
-        SST = sum((target - ybar.^2));
-        R2 = 1 - SSE/SST;
+        [acc, prec, recall, R2] = metrics(prediction, target, ybar);
 
         % append precision, accuracy, and error
         runningPrecision = cat(1,prec,runningPrecision);
         runningAccuracy = cat(1,acc,runningAccuracy);
         runningError = cat(1,J,runningError);
+        runningRecall = cat(1,recall,runningRecall);
         runningR2 = cat(1,R2,runningR2);
 
         %* * * * * * * * * * * * * * * * * * * * *
         %             BACK PROPAGATION
         %* * * * * * * * * * * * * * * * * * * * *
-        [w, b] = backprop2(self, prediction, target, self.images(sample,:));
-        
+        [w, b] = backprop2(self, prediction, target, input);
         b = mean(b,2);
+        
         newWeights(counter,:) = w;
         newBias(counter,:) = b;
         
@@ -200,11 +104,13 @@ function [err, acc, prec, R2] = accelTrain(self)
             err = mean(runningError);
             acc = mean(runningAccuracy);
             prec = mean(runningPrecision);
+            recall = mean(runningRecall);
             R2 = mean(runningR2);
-                        
+
             epochPrecision = cat(1,prec,epochPrecision);
             epochAccuracy = cat(1,acc,epochAccuracy);
             epochError = cat(1,err,epochError);
+            epochRecall = cat(1,recall,epochRecall);
             epochR2 = cat(1,R2,epochR2);
             
             update2(self, newWeights, newBias);
@@ -216,6 +122,7 @@ function [err, acc, prec, R2] = accelTrain(self)
             runningPrecision = [];
             runningAccuracy = [];
             runningError = [];
+            runningRecall = [];
             runningR2 = [];
         end
         
@@ -232,11 +139,14 @@ function [err, acc, prec, R2] = accelTrain(self)
             fprintf([strCR strPer]);
         end
     end  % end of sample set
+    %self.memory = memory;
+    
     
     % return error, accuracy, and precision
     err = mean(epochError);
     acc = mean(epochAccuracy);
     prec = mean(epochPrecision);
+    recall = mean(epochRecall);
     R2 = mean(epochR2);
     
     self.errors = cat(1,err,self.errors);

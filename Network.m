@@ -5,31 +5,32 @@ classdef Network < handle
         weights = {};       % matrices of weights between nodes
         memory = {};        % output from prior layer to current layer
         longmemory = {};    % keeps record of the epoch's output
-        bias = {};          % bias
-        oldDeltas = {};     % deltas used in last 
+        bias = [];          % bias
+        oldDeltas = {};     % deltas used in last iteration
+        backupWeights = {}; % backup weights for reset
+        backupBias = [];    % backup biases for reset
         
         % metric parameters
-        errors = [];        % stores history of errors over the epochs
+        errors = [];        % runnning error over the epochs
         accuracy = [];      % running accuracy
         precision = [];     % running precision
+        recall = [];        % running recall
         R2 = [];            % r-squared
         
         % image parameters
-        images = [];        % structure for images data
+        imageData = [];     % structure for images data
         labels = [];        % structure for image labels
         encodedLabels = []; % structure for one hot encoded image labels
-        
-        training = [];      % structure for training data
-        tngLabels = [];
-        tngEncLabels = [];
-        
-        val = [];           % structure for validation data
-        valLabels = [];
-        valEncLabels = [];
-        
-        test = [];          % structure for test data
-        tstLabels = [];
-        tstEncLabels = [];
+        images = ...
+            struct('training', [],...       % structure for training data
+                   'tngLabels', [],...
+                   'tngEncLabels', [],...
+                   'val', [],...            % structure for validation data
+                   'valLabels', [],...
+                   'valEncLabels', [],...
+                   'test', [],...           % structure for test data
+                   'tstLabels', [],...
+                   'tstEncLabels', []);
                
         % hyperparameters
         epochs;             % number of cycles through the training data
@@ -53,8 +54,7 @@ classdef Network < handle
                    'lasso',false,...    % L2 regularization
                    'momentum',false,... % enables gradient momentum
                    'dropout',false,...  % enables random dropout
-                   'ADAgrad', false,... % enables ADAgrad
-                   'RMSprop', false,... % enables RMSprop
+                   'adam', false,... % enables ADAgrad
                    'early', false);     % enables early termination
                
         % other parameters
@@ -75,20 +75,20 @@ classdef Network < handle
 
             % internal parameters
             net.weights = w;
+            net.oldDeltas = w;
+            net.backupWeights = w;
             net.bias = b;
-            net.transfer = 'tanh';
+            net.backupBias = b;
+            
+            net.transfer = 'leaky';
             net.lastLayer = 'softmax';
             net.costFunction = 'cross';
-            
-            % allocate space for oldDeltas
-            for i = 1:length(w)
-                net.oldDeltas{i} = zeros(size(w{i}));
-            end
             
             % metric parameters
             net.errors = [];
             net.accuracy = [];
             net.precision = [];
+            net.recall = [];
             net.R2 = [];
             
             % image parameters
@@ -97,22 +97,31 @@ classdef Network < handle
             net.encodedLabels = [];
             
             % defauls hyperparameters
-            net.epochs = 300;
-            net.eta = .0001;
-            net.lambda = .01;
+            net.epochs = 50;
+            net.eta = .00001;
+            net.lambda = .1;
             net.mu = .5;
             net.batches = 64;
-            net.droprate = .8;
+            net.droprate = .85;
             net.trial = 1;
-
         end
 
         % prediction function
-%         function predict(self, X)
-%             [correct, wrong] = predict(self, X);
-%             correct;
-%             wrong;
-%         end
+         function test(self, dataX, dataY, dataLabels)
+             switch nargin
+                 case 4
+                    X = dataX;
+                    Y = dataY;
+                    lbls = dataLabels;
+                 otherwise
+                    X = self.images.test;
+                    Y = self.images.tstEncLabels;
+                    lbls = self.images.tstLabels;
+             end
+             [correct, wrong] = prediction(self, X, Y, lbls);
+             fprintf('correct: %d\n',allsum(correct));
+             fprintf('wrong: %d\n',allsum(wrong));
+         end
         
         % executes training cycles
         function fit(self, enabled)
@@ -121,7 +130,7 @@ classdef Network < handle
             self.enableAcceleration(enabled);
             
             % if dropout active, create dropout mask
-            if self.optim.dropout && ~self.optim.none
+            if self.optim.dropout && (self.optim.none == false)
                 for i = 1:length(self.weights)
                     self.dropmask{i} = ...
                         rand(size(self.weights{i})) < self.droprate;
@@ -130,26 +139,26 @@ classdef Network < handle
                     % neurons proportionately to droprate
                     self.weights{i} = self.weights{i} .* self.dropmask{i};
                     self.weights{i} = self.weights{i} / self.droprate;
-                    if self.GPU && enabled
+                    if self.optim.GPU && enabled
                         self.weights{i} = gpuArray(self.weights{i});
                     end
                 end
             end
-            
             if self.optim.parallel
                 try
                     pool = gcp;
-                    if isempty(pool)
-                        pool = 0;
-                    else
-                        pool.NumWokers;
-                    end
                 catch
                     self.optim.parallel = false;
-                    disp('MATLAB cannot run parallelization at this time.');
+                    disp('MATLAB initialize parallelization at this time.');
+                    pause(.1);
+                    if ~isempty(pool)
+                        fprintf('Parallel CPU pool already started.\n');
+                    else
+                        fprintf('Parallel pool is empty.\n');
+                    end
                 end
             end
-            
+
             fit2(self);
             
             if self.optim.parallel
@@ -157,207 +166,80 @@ classdef Network < handle
             end
         end
         
+        % enable GPU acceleration
         function enableAcceleration(self, enable)
         %enableGPUacceleration tests GPU available and gives the user an option to
         %use it or not
 
             % test for GPU access
             try
-                self.GPU = true;
                 gpuArray(1);
             catch
-                self.GPU = false;
+                self.optim.GPU = false;
                 disp('This system cannot use GPUs for data processing in MATLAB.');
             end
 
-            if self.GPU && (enable == false)
+            if self.optim.GPU && (enable == false)
                 fprintf('GPU usage is disabled for this session.\n\n');
-                self.GPU = false;
+                self.optim.GPU = false;
             end
              % enable GPU acceleration
-            if self.GPU && enable
-%                 disp('Enabling GPU acceleration...');
-%                 for i = 1:length(self.weights)
-%                     fprintf('Creating gpuArray for weights, layer %d\n',i);
-%                     pause(.05);
-%                     self.weights{i} = gpuArray((self.weights{i}));
-%                 end
-% 
-%                 self.encodedLabels = gpuArray((self.encodedLabels));
-%                 fprintf('Creating gpuArray encodedLabels\n');
-%                 pause(.05);
-% 
-%                 self.images = gpuArray((self.images));
-%                 self.labels = gpuArray((self.labels));
-%                 for i = 1:length(self.oldDeltas)
-%                     self.oldDeltas{i} = gpuArray(self.oldDeltas{i});
-%                 end
-%                 self.errors = gpuArray(self.errors);
-%                 self.accuracy = gpuArray(self.accuracy);
-%                 self.precision = gpuArray(self.precision);
-%                 self.R2 = gpuArray(self.R2);
-%                 self.epochs = gpuArray(self.epochs);
-%                 self.eta = gpuArray(self.eta);
-%                 self.lambda = gpuArray(self.lambda);
-%                 self.mu = gpuArray(self.mu);
-%                 self.droprate = gpuArray(self.droprate);
-            end
-        end
-
-        
-        
-        function split(self, trainSize, valSize, testSize)
-            [trainSet, valSet, testSet] =...
-                split(self.images, trainSize, valSize, testSize);
-            if self.GPU
-                self.training = gpuArray(trainSet);
-                self.val = gpuArray(valSet);
-                self.test = gpuArray(testSet);
-            else
-                self.training = trainSet;
-                self.val = valSet;
-                self.test = testSet;
-            end
-        end
-        
-        % generate a report without time elapsed
-        function report(self)
-        % generate a report without the time elapsed recorded
-
-            if ~exist('Documents', 'dir')
-                mkdir('Documents');
-            end
-            % the date time group (DTG) is the primary ID tag
-            dtg = datestr(now,'yyyymmdd_HHMM');
-            if self.trial == 1
-                if ispc
-                    self.fileName = [pwd '\Documents\session_' dtg '.txt'];
-                else
-                    self.fileName = [pwd '/Documents/session_' dtg '.txt'];
+            if self.optim.GPU && enable
+                disp('Enabling GPU acceleration...');
+                for i = 1:length(self.weights)
+                    fprintf('Creating gpuArray for weights, layer %d\n',i);
+                    pause(.05);
+                    self.weights{i} = gpuArray((self.weights{i}));
                 end
-                fileID = fopen(self.fileName,'w');
-            else
-                fileID = fopen(self.fileName,'a+');
-            end
 
-            %save neural network
-            fName = self.fileName(1:end-4);
-            networkName = [fName '_network_trial_' num2str(self.trial) '.mat'];
-            save(networkName, 'self');
-            
-            fprintf(fileID,['\nRecord: session_' dtg '\n']);
-            fprintf(fileID,'\n\nTrial %d\n',self.trial);
+                self.images.tngEncLabels = gpuArray(self.images.tngEncLabels );
+                fprintf('Creating gpuArray encoded labels\n');
+                pause(.05);
 
-            fprintf(fileID,'Total epochs:  %d\n',self.epochs);
-            fprintf(fileID,'Average accuracy: %0.5f\n',mean(self.accuracy));
-            fprintf(fileID,'Average precision: %0.5f\n',mean(self.precision));
-            fprintf(fileID,'R^2: %0.5f\n',mean(self.R2));
-            fprintf(fileID,'Learning rate:  %d\n',self.eta);
-            fprintf(fileID,'Batches:  %d\n',self.batches);
-            fprintf(fileID,'NOTE: BGD = 0, SGD = 1\n');
-            fprintf(fileID,'Regularization hyperparameter:  %d\n',self.lambda);
-            fprintf(fileID,'Momentum:  %d\n',self.mu);
-            fprintf(fileID,'Transfer function:  %d\n',self.transfer);
-            fprintf(fileID,'Output function:  %d\n',self.lastLayer);
-            fprintf(fileID,'Cost function:  %d\n',self.costFunction);
-            if self.GPU
-                outString = 'true';
-            else
-                outString = 'false';
+                self.images.training = gpuArray(self.images.training);
+                self.images.tngLabels = gpuArray(self.images.tngLabels);
             end
-            fprintf(fileID,'GPU acceleration: %s\n',outString);
-            
-            fprintf(fileID,'* Optimization schema *\n');
-            if self.optim.none
-                outString = 'true';
-            else
-                outString = 'false';
-            end
-            fprintf(fileID,'\tNone: %s\n',outString);
-            
-            if self.optim.lasso
-                outString = 'true';
-            else
-                outString = 'false';
-            end
-            fprintf(fileID,'\tLasso regularization: %s\n',outString);
-            
-            if self.optim.ridge
-                outString = 'true';
-            else
-                outString = 'false';
-            end
-            fprintf(fileID,'\tRidge regularization: %s\n',outString);
-            
-            if self.optim.momentum
-                outString = 'true';
-            else
-                outString = 'false';
-            end
-            fprintf(fileID,'\tMomentum: %s\n',outString);
-            
-            if self.optim.ADAgrad
-                outString = 'true';
-            else
-                outString = 'false';
-            end
-            fprintf(fileID,'\tADAgrad: %s\n',outString);
-            
-            if self.optim.RMSprop
-                outString = 'true';
-            else
-                outString = 'false';
-            end
-            fprintf(fileID,'\tRMSprop: %s\n',outString);
-           
-            if self.optim.dropout
-                outString = 'true';
-                fprintf(fileID,'\tDropout: %d\n',outString);
-                fprintf(fileID,'\t\t(Drop rate: %0.2f)\n',self.droprate);
-            else
-                outString = 'false';
-                fprintf(fileID,'\tDropout: %d\n',outString);
-            end
-            
-            if self.optim.early
-                outString = 'true';
-                fprintf(fileID,'\tEarly: %s\n',outString);
-            else
-                outString = 'false';
-                fprintf(fileID,'\tEarly: %s\n',outString);
-            end            
-            
-            
-            fclose(fileID);
-
-            if ~exist('images','dir')
-                mkdir('images');
-            end
-            if ispc
-                figureName = [pwd '\images\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
-            else
-                figureName = [pwd '/images/' dtg 'trial_figure_' num2str(self.trial) '.fig'];
-            end
-            savefig(figureName);
-
-            self.trial = self.trial + 1;
-            pause(1);
-        end % end function: report
+        end
         
+        % split images into training, validation, and test sets
+        function split(self, tng, vl, tst)
+        % split the data into training, validation, and testing sets
+        
+            switch nargin
+                case 1
+                    trainSize = 1;
+                    valSize = 0;
+                    testSize = 0;
+                case 2
+                    trainSize = tng;
+                    valSize = 0;
+                    testSize = 0;
+                case 3
+                    trainSize = tng;
+                    valSize = vl;
+                    testSize = 0;
+                otherwise
+                    trainSize = tng;
+                    valSize = vl;
+                    testSize = tst;
+            end
+            splitData(self, trainSize, valSize, testSize);
+        end
+
         % generate a report with elapsed time
-        function timedReport(self, epochTime, ep, backup)
+        function report(self, epochTime, ep, backup)
         % generate a report with the time elapsed recorded
 
-            if ~exist('Documents', 'dir')
-                mkdir('Documents');
+            if ~exist([pwd '/reports'], 'dir')
+                mkdir('reports');
             end
             % the date time group (DTG) is the primary ID tag
             dtg = datestr(now,'yyyymmdd_HHMM');
             if self.trial == 1
                 if ispc
-                    self.fileName = [pwd '\Documents\session_' dtg '.txt'];
+                    self.fileName = [pwd '\reports\session_' dtg '.txt'];
                 else
-                    self.fileName = [pwd '/Documents/session_' dtg '.txt'];
+                    self.fileName = [pwd '/reports/session_' dtg '.txt'];
                 end
                 fileID = fopen(self.fileName,'w');
             else
@@ -369,7 +251,7 @@ classdef Network < handle
             
             % save backups
             if backup
-                fName = [fName '_BACKUP_epoch_' ep];
+                fName = [fName '_BACKUP_epoch_' num2str(ep)];
             end
 
             networkName = [fName '_network_trial_' num2str(self.trial) '.mat'];
@@ -389,8 +271,11 @@ classdef Network < handle
             end
             fprintf(fileID,'Total time elapsed: %0.5f seconds\n',epochTime);
             fprintf(fileID,'Average time per epoch: %0.5f seconds\n',epochTime/self.epochs);
+            fprintf(fileID,'Average error: %0.5f\n',mean(self.errors));
+            fprintf(fileID,'Final error: %0.5f\n',self.errors(1));
             fprintf(fileID,'Average accuracy: %0.5f\n',mean(self.accuracy));
             fprintf(fileID,'Average precision: %0.5f\n',mean(self.precision));
+            fprintf(fileID,'Average recall: %0.5f\n',mean(self.recall));
             fprintf(fileID,'R^2: %0.5f\n',mean(self.R2));
             fprintf(fileID,'Learning rate:  %0.5f\n',self.eta);
             fprintf(fileID,'Batches:  %d\n',self.batches);
@@ -400,7 +285,14 @@ classdef Network < handle
             fprintf(fileID,'Transfer function:  %s\n',self.transfer);
             fprintf(fileID,'Output function:  %s\n',self.lastLayer);
             fprintf(fileID,'Cost function:  %s\n',self.costFunction);
-            if self.GPU
+            if self.optim.parallel
+                outString = 'true';
+            else
+                outString = 'false';
+            end
+            fprintf(fileID,'Paralellization: %s\n',outString);
+            
+            if self.optim.GPU
                 outString = 'true';
             else
                 outString = 'false';
@@ -435,20 +327,12 @@ classdef Network < handle
             end
             fprintf(fileID,'\tMomentum: %s\n',outString);
             
-            if self.optim.ADAgrad
+            if self.optim.adam
                 outString = 'true';
             else
                 outString = 'false';
             end
-            fprintf(fileID,'\tADAgrad: %s\n',outString);
-            
-            
-            if self.optim.RMSprop
-                outString = 'true';
-            else
-                outString = 'false';
-            end
-            fprintf(fileID,'\tRMSprop: %s\n',outString);
+            fprintf(fileID,'\tadam: %s\n',outString);
            
             if self.optim.dropout
                 outString = 'true';
@@ -470,13 +354,13 @@ classdef Network < handle
             fclose(fileID);
 
             % save figure
-            if ~exist('imagefolder','dir')
+            if ~exist('images','dir')
                 mkdir('images');
             end
             if ispc
-                figureName = [pwd '\imagefolder\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+                figureName = [pwd '\images\' dtg 'trial_figure_' num2str(self.trial) '.fig'];
             else
-                figureName = [pwd '/imagefolder/' dtg 'trial_figure_' num2str(self.trial) '.fig'];
+                figureName = [pwd '/images/' dtg 'trial_figure_' num2str(self.trial) '.fig'];
             end
             savefig(figureName);
 
@@ -484,66 +368,55 @@ classdef Network < handle
         end %end function: timedReport
 
         % reset the network
-        function reset(self)
+        function reset(self, change)
         % reset the network weights, biases, memory, oldDelta, errors,
         % accuracy, and precision
         
-            % reset weights and biases
-            switch self.transfer
-                case {'relu', 'leaky'}
+        switch nargin
+            case 2
+                if (change == true)
+                    layers = [];
                     for i = 1:length(self.weights)
-                        self.weights{i} = randn(size(self.weights{i})) *...
-                            (2/sqrt(length(self.weights{i})));
-                        self.bias(i) = 1;
-                    end
-                case 'tanh'
-                    for i = 1:length(self.weights)
-                        self.weights{i} = randn(size(self.weights{i})) *...
-                            (1/sqrt(length(self.weights{i})));
-                        self.bias(i) = 1;
-                    end
-                otherwise
-                    layers =  length(self.weights);
-                    for i = 1:layers
-                        H1 = numel(self.weights{i});
+                        [out, in] = size(self.weights{i});
                         if i == 1
-                            H2 = H1;
+                            layers = [in out];
                         else
-                            H2 = numel(self.weights{i-1});
-                        end
-                        b = sqrt(6) / sqrt(H1 + H2);
-                        % if last layer
-                        if i == layers
-                            rows = length(unique(net.labels));
-                        else
-                            rows = length(self.weights{i+1});
-                        end
-                        columns = size(self.weights{i},1);
-                        self.weights{i} = -b + (2*b)*rand([rows columns]);
-                        self.bias(i) = 1;
-                        if self.GPU
-                            self.weights{i} = gpuArray(self.weights{i});
-                            self.bias(i) = gpuArray(self.bias(i));
+                            layers = cat(2,layers,out);
                         end
                     end
-            end % end switch
-            
+
+                    for i = 1:(length(layers)-1)
+                        H1 = double(layers(i));
+                        if i == 1
+                            H2 = double(H1);
+                        else
+                            H2 = double(layers(i-1));
+                        end
+                        b = sqrt(6.0) / sqrt(H1 + H2);
+                        self.weights{i} = -b + (2*b)*rand([layers(i+1) layers(i)]);
+                        self.bias(i) = 1;
+                    end
+                else
+                    self.weights = self.backupWeights;
+                    self.bias = self.backupBias;
+                end
+            otherwise
+                self.weights = self.backupWeights;
+                self.bias = self.backupBias;
+        end
             % reset the rest
+            self.resetMetrics();
+        end % end function: reset
+        
+        function resetMetrics(self)
             self.memory = {};
-            self.oldDeltas = {};
-            self.longmemory = {};
+            self.oldDeltas = self.weights;
             self.errors = [];
             self.accuracy = [];
+            self.recall = [];
             self.precision = [];
             self.R2 = [];
-            if self.GPU
-                self.errors = gpuArray(self.errors);
-                self.accuracy = gpuArray(self.accuracy);
-                self.precision = gpuArray(self.precision);
-                self.R2 = gpuArray(self.R2);
-            end
-                
-        end % end function: reset
+        end
         
     end % end methods section
     

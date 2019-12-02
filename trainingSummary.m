@@ -2,6 +2,7 @@ function trainingSummary(self, epochTime, ep, backup)
     % * * * * * * * * * * *
     %   Display Results
     % * * * * * * * * * * *
+    fprintf('ep : %d\n',ep);
     set(gcf, 'Position', [50 30 700 500]);
     y1 = flip(self.errors);
     y2 = flip(self.R2);
@@ -25,6 +26,8 @@ function trainingSummary(self, epochTime, ep, backup)
     plot(x,y4),xlabel('Epochs'),ylabel('Precision');
     title(['Precision Over ',num2str(ep),' Epochs']);
 
-    self.timedReport(epochTime,ep,backup);
+    if epochTime > 0
+        self.report(epochTime,ep,backup);
+    end
 
 end
