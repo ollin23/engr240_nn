@@ -19,40 +19,43 @@ UPDATE, 18 Nov 2019
 
 BOILERPLATE WORKFLOW<br/>
 <pre>
-   dd = firstMenu();                      % Step 1: choose training data<br>
-   data = load(dd);                       % Step 2: load data into memory
-   [labels, images] = MNIST(data);        % Step 3: separate images and labels
-   network = menuNetwork(images, labels); % Step 4: build network
-   menuHyper(network);                    % Step 5: set hyperparameters for this session
-   % not fully implemented
-   %network.split(.8,.2);                  % Step 6: split the data into training and validation sets,
-                                          %         example: 80 training 20 validation
-   network.fit();                         % Step 7: train the network
-   
-   % The below are not yet implemented
-   %network.test();                       % Step 8: run the test data
+   dd = firstMenu();                       % Step 1: choose training data
+   data = load(dd);                        % Step 2: load data into memory
+   [labels, images] = MNIST(data);         % Step 3: separate images and labels
+   network = buildNetwork(labels, images); % Step 4: build network
+   menuHyper(network);                     % Step 5: set hyperparameters for this session
+   network.split(.7,.2,.1);                % Step 6: split the data into training, validation, and test sets
+                                           %         example: for 100 samples split 70 for training,
+                                           %         20 for validation, and 10 for testing
+   network.fit(false);                     % Step 7: train the network, no GPU/parallelism applied
+   network.predict('test');                % Step 8: run the test data
    % Step 9: save and name the model
    % Step 10: choose to run again, changing hyperparameters
 </pre>
    
 Functions:
+- accelTrain: implements GPU processing
 - activate: activation functions
 - backprop2: backpropagation algorithm
+- buildNetwork: interface to generate an MLP
 - cost: cost functions
 - createNetwork: initializes the neural net
 - displayNetworkDesign: allows user to numerically see how the network is designed
 - feedforward2: feedforward algorithm
-- firstMenu: first options for using project, choice of which dataset to use
+- firstMenu: choice of which dataset to use
 - fit2: wrapper function for training data; implements epoch cycles and graph
 - menu: menu to drive topology design
 - menuHyper: menu to drive hyperpamater tuning
+- metrics: calculate metrics
+- normalize: normalizes data
 - oneHotEncoding: encodes input data
 - MNIST: splits the csv into label and image structures; shows user a sample of the images
+- prediction: predicts results based on model
 - sigmoid: sigmoid function
 - softmax: softmax function
-- split: splits data into training, validation, and testing sets
+- splitData: splits data into training, validation, and testing sets
 - train2: trains the network, gathers loss and accuracy metrics
-- trainSummary: generates a training report
+- trainingSummary: generates a training report
 - update2: updates network parameters
 
 Objects
