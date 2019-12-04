@@ -54,7 +54,7 @@ function [err, acc, prec, rec, R2] = train2(self)
         %      FEEDFORWARD
         % * * * * * * * * * * *
         prediction = feedforward2(self, input);
-        prediction = normalize(prediction);
+        %prediction = normalize(prediction);
         
         % * * * * * * * * * * * *
         %     Calculate Error

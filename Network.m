@@ -11,7 +11,13 @@ classdef Network < handle
         backupBias = [];    % backup biases for reset
         
         % metric parameters
+        error = ...
+            struct('training', [],...
+                   'validation', [],...
+                   'test', []);
         errors = [];        % runnning error over the epochs
+        validationErr = []; % validation error
+        testErr = [];       % test error
         accuracy = [];      % running accuracy
         precision = [];     % running precision
         recall = [];        % running recall
@@ -107,20 +113,47 @@ classdef Network < handle
         end
 
         % prediction function
-         function test(self, dataX, dataY, dataLabels)
-             switch nargin
-                 case 4
-                    X = dataX;
-                    Y = dataY;
-                    lbls = dataLabels;
+         function predict(self, option)
+         %predict predicts results based on the trained model
+         %
+         % Example :
+         %  net.predict('test')
+         %
+            switch nargin
+                 case 2
+                    switch option
+                        case 'test'
+                            X = self.images.test;
+                            Y = self.images.tstEncLabels;
+                            lbls = self.images.tstLabels;
+                        case 'validation'
+                            X = self.images.val;
+                            Y = self.images.valEncLabels;
+                            lbls = self.images.valLabels;
+                        otherwise
+                            disp('ERROR; enter "test" or "validation"');
+                            
+                    end
                  otherwise
                     X = self.images.test;
                     Y = self.images.tstEncLabels;
                     lbls = self.images.tstLabels;
-             end
-             [correct, wrong] = prediction(self, X, Y, lbls);
-             fprintf('correct: %d\n',allsum(correct));
-             fprintf('wrong: %d\n',allsum(wrong));
+                    option = 'test';
+            end
+            [c, w, e] = prediction(self, X, Y, lbls);
+            switch option
+                case 'test'
+                    self.error.test = cat(1,e,self.error.test);
+                case 'validation'
+                    self.error.validation = cat(1,e,self.error.validation);
+                otherwise
+                    disp('ERROR: no type chosen for test/validation');
+            end
+                     
+            proportion = length(c) / length(w);
+            fprintf('\t      correct:\t%d\n',length(c));
+            fprintf('\t\twrong:\t%d\n',length(w));
+            fprintf('\t\tratio:\t%0.2f\n',proportion);
          end
         
         % executes training cycles
@@ -416,6 +449,10 @@ classdef Network < handle
             self.recall = [];
             self.precision = [];
             self.R2 = [];
+            
+            self.error.training = [];
+            self.error.validation = [];
+            self.error.test = [];
         end
         
     end % end methods section

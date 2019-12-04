@@ -12,7 +12,7 @@ function [prediction] = feedforward2(self, X)
 layers = length(self.weights);
 
 for layer = 1:layers
-    h =  X * self.weights{layer}'  + self.bias(layer);
+    h =  X * self.weights{layer}' + self.bias(layer);
 
     % save pre-transferred data in memory for backprop
     self.memory{layer} = h;
@@ -23,7 +23,6 @@ for layer = 1:layers
     else
         transferFunction = self.transfer;
     end
-    
     
     a = activate(h, transferFunction, false);
             
