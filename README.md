@@ -16,9 +16,11 @@ BOILERPLATE WORKFLOW<br/>
    [labels, images] = MNIST(data);         % Step 3: separate images and labels
    network = buildNetwork(labels, images); % Step 4: build network
    menuHyper(network);                     % Step 5: set hyperparameters for this session
-   network.split(.7,.2,.1);                % Step 6: split data into training, validation, and test sets
-                                           %         example: for 100 samples split 70 for training,
+   network.split(.7,.2,.1);                % Step 6: split data into training, validation, and
+                                           %         test sets
+                                           %         Example: for 100 samples split 70 for training,
                                            %         20 for validation, and 10 for testing
+   % NOTE: enter false if using non-nVidia GPU                                        
    network.fit(false);                     % Step 7: train the network, no GPU/parallelism applied
    network.predict('test');                % Step 8: run the test data
    % Step 9: save and name the model
