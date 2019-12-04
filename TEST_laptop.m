@@ -17,23 +17,25 @@ clc;
 dd = firstMenu();
 data = load(dd);
 [labels, images] = MNIST(data);
-
-net = menuNetwork(images, labels);
+net = menuNetwork(labels, images);
+net.split(.7,.2,.1);
 
 % directly set hyperparameters
 net.epochs = 500;
 net.eta = .00001;
 net.batches = 1;           % BGD= 0; SGD = 1, 
 net.lambda = .1;           % L1, L2 hyperparameter
-net.mu = .7;                % momentum sensitivity hyperparameter
+net.mu = .4;                % momentum sensitivity hyperparameter
 net.transfer = 'leaky';       
 net.lastLayer = 'softmax';
-net.costFunction = 'mse';  
+net.costFunction = 'cross';  
 net.optim.none = false;     % overrides all optimizations
 net.optim.lasso = false;
 net.optim.ridge = true;
-net.optim.momentum = false;
+net.optim.momentum = true;
 net.optim.dropout = false;
 net.droprate = .85;
 net.optim.early = false;
+
 net.fit(false);
+net.predict('test');
