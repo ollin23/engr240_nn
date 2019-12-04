@@ -1,21 +1,12 @@
 # engr240_nn
 MATLAB based MLP
 This is the project for my Engineering Applications class for Fall 2019.
-Last update: 18 Nov 2019
+Last update: 3 Dec 2019
 
-
-UPDATE, 18 Nov 2019
-- enabled GPU acceleration when applicable
-- files affected:
-   - ProjectMain
-   - Network
-   - createNetwork
-- Upcoming:
-   + Considering ADAgrad and/or RMSProp
-   + Still working on plots for gradients, results
-   + Tweak early stop
-   + Add parallelization
-   + Modify for GPU acceleration improvement
+UPDATE, 3 Dec 2019
+- added prediction function
+- improvements to auto-generated reports
+- improvements to Network object
 
 BOILERPLATE WORKFLOW<br/>
 <pre>
@@ -97,7 +88,21 @@ Notes, 15 Nov 2019
 - normalize: function to normalize data
 - activate: minor documentation update
 
-Notes, 17  Nov 2019
+
+Notes, 18 Nov 2019
+- enabled GPU acceleration when applicable
+- files affected:
+   - ProjectMain
+   - Network
+   - createNetwork
+- Upcoming:
+   + Considering ADAgrad and/or RMSProp
+   + Still working on plots for gradients, results
+   + Tweak early stop
+   + Add parallelization
+   + Modify for GPU acceleration improvement
+
+Notes, 17 Nov 2019
 - enabled GPU acceleration when applicable
 - files affected:
    - ProjectMain
