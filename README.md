@@ -7,6 +7,7 @@ UPDATE, 3 Dec 2019
 - added prediction function
 - improvements to auto-generated reports
 - improvements to Network object
+- improvements to report plots
 
 BOILERPLATE WORKFLOW<br/>
 <pre>
@@ -15,7 +16,7 @@ BOILERPLATE WORKFLOW<br/>
    [labels, images] = MNIST(data);         % Step 3: separate images and labels
    network = buildNetwork(labels, images); % Step 4: build network
    menuHyper(network);                     % Step 5: set hyperparameters for this session
-   network.split(.7,.2,.1);                % Step 6: split the data into training, validation, and test sets
+   network.split(.7,.2,.1);                % Step 6: split data into training, validation, and test sets
                                            %         example: for 100 samples split 70 for training,
                                            %         20 for validation, and 10 for testing
    network.fit(false);                     % Step 7: train the network, no GPU/parallelism applied
