@@ -1,0 +1,32 @@
+
+Record: session_20191201_1643
+
+Trial 1
+Total epochs:  15
+Total time elapsed: 63.41948 seconds
+Average time per epoch: 4.22797 seconds
+Average error: 2.46274
+Final error: 2.45863
+Average accuracy: 0.66916
+Average precision: 0.54284
+Average recall: 0.90212
+R^2: -0.02895
+Learning rate:  0.00001
+Batches:  64
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.50
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	ADAgrad: false
+	RMSprop: false
+	Dropout: false
+	Early: false

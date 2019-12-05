@@ -254,9 +254,6 @@ switch self.transfer
         for i = 1:length(self.weights)
             self.weights{i} = randn(size(self.weights{i})) *...
                 (2/sqrt(length(self.weights{i})));
-            if self.GPU
-                self.weights{i} = gpuArray(self.weights{i});
-            end
         end
     case 'tanh'
         for i = 1:length(self.weights)
@@ -264,19 +261,8 @@ switch self.transfer
             fprintf('Tanh work best using Xavier initialization.\n');
             self.weights{i} = randn(size(self.weights{i})) *...
                 (1/sqrt(length(self.weights{i})));
-            if self.GPU
-                self.weights{i} = gpuArray(self.weights{i});
-            end
         end
 end
 
-if self.GPU
-    self.epochs = gpuArray(self.epochs);
-    self.eta = gpuArray(self.eta);
-    self.lambda = gpuArray(self.lambda);
-    self.mu = gpuArray(self.mu);
-    self.batches = gpuArray(self.batches);
-    self.droprate = gpuArray(self.droprate);
-end
 
 end % end of function

@@ -1,0 +1,721 @@
+
+Record: session_20191202_0902
+
+Trial 1
+Total epochs:  5
+Total time elapsed: 20.83922 seconds
+Average time per epoch: 4.16784 seconds
+Average error: 2.77580
+Final error: 2.77550
+Average accuracy: 0.90367
+Average precision: 0.90367
+Average recall: 0.90367
+R^2: -0.06288
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_0904
+
+Trial 2
+Total epochs:  5
+Total time elapsed: 20.33189 seconds
+Average time per epoch: 4.06638 seconds
+Average error: 2.77580
+Final error: 2.77550
+Average accuracy: 0.90367
+Average precision: 0.90367
+Average recall: 0.90367
+R^2: -0.06288
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_0906
+
+Trial 3
+Total epochs:  5
+Total time elapsed: 20.61519 seconds
+Average time per epoch: 4.12304 seconds
+Average error: 2.77580
+Final error: 2.77550
+Average accuracy: 0.90367
+Average precision: 0.90367
+Average recall: 0.90367
+R^2: -0.06288
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_0908
+
+Trial 4
+Total epochs:  5
+Total time elapsed: 20.11535 seconds
+Average time per epoch: 4.02307 seconds
+Average error: 2.77580
+Final error: 2.77550
+Average accuracy: 0.90367
+Average precision: 0.90367
+Average recall: 0.90367
+R^2: -0.06288
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_0909
+
+Trial 5
+Total epochs:  5
+Total time elapsed: 20.50629 seconds
+Average time per epoch: 4.10126 seconds
+Average error: 2.77580
+Final error: 2.77550
+Average accuracy: 0.90367
+Average precision: 0.90367
+Average recall: 0.90367
+R^2: -0.06288
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_0912
+
+Trial 6
+Total epochs:  20
+Total time elapsed: 82.61514 seconds
+Average time per epoch: 4.13076 seconds
+Average error: 2.76520
+Final error: 2.75661
+Average accuracy: 0.90347
+Average precision: 0.90347
+Average recall: 0.90347
+R^2: -0.06186
+Learning rate:  0.00010
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_0912
+
+Trial 7
+Total epochs:  20
+Total time elapsed: 82.61514 seconds
+Average time per epoch: 4.13076 seconds
+Average error: 2.76520
+Final error: 2.75661
+Average accuracy: 0.90347
+Average precision: 0.90347
+Average recall: 0.90347
+R^2: -0.06186
+Learning rate:  0.00010
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_0917
+
+Trial 8
+Total epochs:  20
+Total time elapsed: 82.30495 seconds
+Average time per epoch: 4.11525 seconds
+Average error: 2.76520
+Final error: 2.75661
+Average accuracy: 0.90347
+Average precision: 0.90347
+Average recall: 0.90347
+R^2: -0.06186
+Learning rate:  0.00010
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_0918
+
+Trial 9
+Total epochs:  20
+Total time elapsed: 82.30495 seconds
+Average time per epoch: 4.11525 seconds
+Average error: 2.76520
+Final error: 2.75661
+Average accuracy: 0.90347
+Average precision: 0.90347
+Average recall: 0.90347
+R^2: -0.06186
+Learning rate:  0.00010
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: true
+	Lasso regularization: false
+	Ridge regularization: false
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_1133
+
+Trial 10
+Total epochs:  100
+Total time elapsed: 6811.10196 seconds
+Average time per epoch: 68.11102 seconds
+Average error: 2.77031
+Final error: 2.76448
+Average accuracy: 0.90363
+Average precision: 0.90363
+Average recall: 0.90363
+R^2: -0.06237
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_1337
+
+Trial 11
+Total epochs:  100
+Total time elapsed: 13629.69256 seconds
+Average time per epoch: 136.29693 seconds
+Average error: 2.76400
+Final error: 2.75138
+Average accuracy: 0.90357
+Average precision: 0.90357
+Average recall: 0.90357
+R^2: -0.06177
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_1541
+
+Trial 12
+Total epochs:  100
+Total time elapsed: 20432.84659 seconds
+Average time per epoch: 204.32847 seconds
+Average error: 2.75745
+Final error: 2.73781
+Average accuracy: 0.90352
+Average precision: 0.90352
+Average recall: 0.90352
+R^2: -0.06113
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_1745
+
+Trial 13
+Total epochs:  100
+Total time elapsed: 27235.54878 seconds
+Average time per epoch: 272.35549 seconds
+Average error: 2.75059
+Final error: 2.72295
+Average accuracy: 0.90348
+Average precision: 0.90348
+Average recall: 0.90348
+R^2: -0.06046
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_1949
+
+Trial 14
+Total epochs:  100
+Total time elapsed: 34045.45721 seconds
+Average time per epoch: 340.45457 seconds
+Average error: 2.74351
+Final error: 2.70824
+Average accuracy: 0.90344
+Average precision: 0.90344
+Average recall: 0.90344
+R^2: -0.05975
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_1949
+
+Trial 15
+Total epochs:  100
+Total time elapsed: 34045.45721 seconds
+Average time per epoch: 340.45457 seconds
+Average error: 2.74351
+Final error: 2.70824
+Average accuracy: 0.90344
+Average precision: 0.90344
+Average recall: 0.90344
+R^2: -0.05975
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191202_2216
+
+Trial 16
+Total epochs:  5
+Total time elapsed: 1751.12051 seconds
+Average time per epoch: 350.22410 seconds
+Average error: 2.70242
+Final error: 2.70097
+Average accuracy: 0.90330
+Average precision: 0.90330
+Average recall: 0.90330
+R^2: -0.05561
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191203_1511
+
+Trial 17
+Total epochs:  25
+Total time elapsed: 6908.08427 seconds
+Average time per epoch: 276.32337 seconds
+Average error: 2.78236
+Final error: 2.76502
+Average accuracy: 0.90105
+Average precision: 0.90105
+Average recall: 0.90105
+R^2: -0.07490
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: true
+		(Drop rate: 0.90)
+	Early: false
+
+Record: session_20191203_1542
+
+Trial 18
+Total epochs:  25
+Total time elapsed: 8612.04707 seconds
+Average time per epoch: 344.48188 seconds
+Average error: 2.77775
+Final error: 2.75551
+Average accuracy: 0.90106
+Average precision: 0.90106
+Average recall: 0.90106
+R^2: -0.07423
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.40
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: false
+	adam: false
+	Dropout: true
+		(Drop rate: 0.90)
+	Early: false
+
+Record: session_20191204_0021
+
+Trial 19
+Total epochs:  1
+Total time elapsed: 340.89177 seconds
+Average time per epoch: 340.89177 seconds
+Average error: 2.66569
+Final error: 2.66569
+Average accuracy: 0.90129
+Average precision: 0.90129
+Average recall: 0.90129
+R^2: -0.05745
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.50
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: true
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191204_0226
+
+Trial 20
+Total epochs:  25
+Total time elapsed: 6218.05100 seconds
+Average time per epoch: 248.72204 seconds
+Average error: 2.65263
+Final error: 2.64110
+Validation error: 2.67318
+Average accuracy: 0.90123
+Average precision: 0.90123
+Average recall: 0.90123
+R^2: -0.05550
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.50
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: true
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191204_0255
+
+Trial 21
+Total epochs:  25
+Total time elapsed: 7767.87767 seconds
+Average time per epoch: 310.71511 seconds
+Average error: 2.64962
+Final error: 2.63523
+Validation error: 2.67009
+Average accuracy: 0.90122
+Average precision: 0.90122
+Average recall: 0.90122
+R^2: -0.05505
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.50
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: true
+	adam: false
+	Dropout: false
+	Early: false
+
+Record: session_20191204_1629
+
+Trial 22
+Total epochs:  20
+Total time elapsed: 6174.16881 seconds
+Average time per epoch: 308.70844 seconds
+Average error: 2.63611
+Final error: 2.62859
+Validation error: 2.64598
+Average accuracy: 0.90029
+Average precision: 0.90029
+Average recall: 0.90029
+R^2: -0.06224
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.50
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: true
+	adam: false
+	Dropout: true
+		(Drop rate: 0.90)
+	Early: false
+
+Record: session_20191204_1629
+
+Trial 23
+Total epochs:  20
+Total time elapsed: 6174.16881 seconds
+Average time per epoch: 308.70844 seconds
+Average error: 2.63611
+Final error: 2.62859
+Validation error: 2.64598
+Average accuracy: 0.90029
+Average precision: 0.90029
+Average recall: 0.90029
+R^2: -0.06224
+Learning rate:  0.00001
+Batches:  1
+	**NOTE: BGD = 0, SGD = 1
+Regularization hyperparameter:  0.10000
+Momentum:  0.50
+Transfer function:  leaky
+Output function:  softmax
+Cost function:  cross
+Paralellization: false
+GPU acceleration: false
+* Optimization schema *
+	None: false
+	Lasso regularization: false
+	Ridge regularization: true
+	Momentum: true
+	adam: false
+	Dropout: true
+		(Drop rate: 0.90)
+	Early: false

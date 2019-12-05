@@ -1,4 +1,6 @@
 function trainingSummary(self, epochTime, ep, backup)
+
+
     % * * * * * * * * * * *
     %   Display Results
     % * * * * * * * * * * *
@@ -10,10 +12,10 @@ function trainingSummary(self, epochTime, ep, backup)
     y4 = flip(self.precision);
     x = 1:ep;
     
-    if exist('self.error.validation', 'var')
+    if nnz(self.error.validation) > 0
         valErr = flip(self.error.validation);
     end
-    if exist('self.error.test', 'var')
+    if nnz(self.error.test) >0
         tstErr = flip(self.error.test);
     end
     
@@ -52,4 +54,5 @@ function trainingSummary(self, epochTime, ep, backup)
         self.report(epochTime,ep,backup);
     end
 
+    
 end

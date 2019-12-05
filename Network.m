@@ -151,6 +151,7 @@ classdef Network < handle
             end
                      
             proportion = length(c) / length(w);
+            
             fprintf('\t      correct:\t%d\n',length(c));
             fprintf('\t\twrong:\t%d\n',length(w));
             fprintf('\t\tratio:\t%0.2f\n',proportion);
@@ -217,21 +218,25 @@ classdef Network < handle
                 self.optim.GPU = false;
             end
              % enable GPU acceleration
-            if self.optim.GPU && enable
-                disp('Enabling GPU acceleration...');
-                for i = 1:length(self.weights)
-                    fprintf('Creating gpuArray for weights, layer %d\n',i);
+             try
+                if self.optim.GPU && enable
+                    disp('Enabling GPU acceleration...');
+                    for i = 1:length(self.weights)
+                        fprintf('Creating gpuArray for weights, layer %d\n',i);
+                        pause(.05);
+                        self.weights{i} = gpuArray((self.weights{i}));
+                    end
+
+                    self.images.tngEncLabels = gpuArray(self.images.tngEncLabels );
+                    fprintf('Creating gpuArray encoded labels\n');
                     pause(.05);
-                    self.weights{i} = gpuArray((self.weights{i}));
+
+                    self.images.training = gpuArray(self.images.training);
+                    self.images.tngLabels = gpuArray(self.images.tngLabels);
                 end
-
-                self.images.tngEncLabels = gpuArray(self.images.tngEncLabels );
-                fprintf('Creating gpuArray encoded labels\n');
-                pause(.05);
-
-                self.images.training = gpuArray(self.images.training);
-                self.images.tngLabels = gpuArray(self.images.tngLabels);
-            end
+             catch
+                 disp('ERROR: unable to dispatch GPU acceleration on this system.');
+             end
         end
         
         % split images into training, validation, and test sets
@@ -262,8 +267,12 @@ classdef Network < handle
         % generate a report with elapsed time
         function report(self, epochTime, ep, backup)
         % generate a report with the time elapsed recorded
-
-            if ~exist([pwd '/reports'], 'dir')
+            if ispc
+                rptFolder = [pwd '\reports'];
+            else
+                rptFolder = [pwd '/reports'];
+            end
+            if ~exist(rptFolder, 'dir')
                 mkdir('reports');
             end
             % the date time group (DTG) is the primary ID tag
@@ -306,6 +315,7 @@ classdef Network < handle
             fprintf(fileID,'Average time per epoch: %0.5f seconds\n',epochTime/self.epochs);
             fprintf(fileID,'Average error: %0.5f\n',mean(self.errors));
             fprintf(fileID,'Final error: %0.5f\n',self.errors(1));
+            fprintf(fileID,'Validation error: %0.5f\n',mean(self.error.validation));
             fprintf(fileID,'Average accuracy: %0.5f\n',mean(self.accuracy));
             fprintf(fileID,'Average precision: %0.5f\n',mean(self.precision));
             fprintf(fileID,'Average recall: %0.5f\n',mean(self.recall));
