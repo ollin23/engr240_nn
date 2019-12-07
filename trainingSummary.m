@@ -6,17 +6,31 @@ function trainingSummary(self, epochTime, ep, backup)
     % * * * * * * * * * * *
     fprintf('ep : %d\n',ep);
     set(gcf, 'Position', [50 30 700 500]);
-    y1 = flip(self.errors);
-    y2 = flip(self.R2);
-    y3 = flip(self.accuracy);
-    y4 = flip(self.precision);
-    x = 1:ep;
+
+    if ep ~= self.epochs
+        x = (1+(length(self.errors)-ep)):length(self.errors);
+    else
+        x = 1:ep;
+    end
+
+    y1 = self.errors(x);
+    y2 = self.R2(x);
+    y3 = self.accuracy(x);
+    y4 = self.precision(x);
+    
+    y1 = flip(y1);
+    y2 = flip(y2);
+    
+    y3 = flip(y3);
+    y4 = flip(y4);
     
     if nnz(self.error.validation) > 0
-        valErr = flip(self.error.validation);
+        valErr = self.error.validation(x);
+        valErr = flip(valErr);
     end
     if nnz(self.error.test) >0
-        tstErr = flip(self.error.test);
+        tstErr = self.error.test(x);
+        tstErr = flip(tstErr);
     end
     
 
