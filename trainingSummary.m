@@ -35,15 +35,15 @@ function trainingSummary(self, epochTime, ep, backup)
     
 
     subplot(2,2,1)
-    if nnz(self.error.validation)>0
+    if nnz(self.error.validation)>0 && nnz(self.error.test)>0
+         plot(x,y1,x,valErr,x,tstErr),...
+            legend('Training','Validation','Test');
+    elseif nnz(self.error.validation)>0
         plot(x,y1,x,valErr),...
             legend('Training','Validation');
     elseif nnz(self.error.test)>0
         plot(x,y1,x,tstErr),...
             legend('Training','Test');
-    elseif nnz(self.error.validation)>0 && nnz(net.error.test)>0
-        plot(x,y1,x,valErr,x,tstErr),...
-            legend('Training','Validation','Test');
     else
         plot(x,y1),...
             legend('Training');
