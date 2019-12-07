@@ -12,9 +12,6 @@ function fit2(self)
     % * * * * * * * * * * * * * * * * * *
     maxEpochs = self.epochs;
     for epoch = 1:maxEpochs
-        % reset longmemory
-        %self.longmemory = {};        
-        
         % reset time keepers
         self.stop = 0;
 
@@ -36,11 +33,13 @@ function fit2(self)
 
         
         epochSummary(err, acc, prec, R2);
+        self.predict('validation');
+        self.predict('test');
 
         epochTime = epochTime + self.stop;
         maxAcc = max(self.accuracy);
-        maxPrec = max(self.precision);
-        maxRecall = max(self.recall);
+        %maxPrec = max(self.precision);
+        %maxRecall = max(self.recall);
         maxR2 = max(self.R2);
         minError = min(self.errors);
         

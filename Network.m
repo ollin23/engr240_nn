@@ -123,13 +123,23 @@ classdef Network < handle
                  case 2
                     switch option
                         case 'test'
-                            X = self.images.test;
-                            Y = self.images.tstEncLabels;
-                            lbls = self.images.tstLabels;
+                            try
+                                X = self.images.test;
+                                Y = self.images.tstEncLabels;
+                                lbls = self.images.tstLabels;
+                            catch
+                                disp('No test samples available');
+                                pause();
+                            end
                         case 'validation'
-                            X = self.images.val;
-                            Y = self.images.valEncLabels;
-                            lbls = self.images.valLabels;
+                            try
+                                X = self.images.val;
+                                Y = self.images.valEncLabels;
+                                lbls = self.images.valLabels;
+                            catch
+                                disp('No validation samples available.');
+                                pause();
+                            end
                         otherwise
                             disp('ERROR; enter "test" or "validation"');
                             
@@ -140,21 +150,29 @@ classdef Network < handle
                     lbls = self.images.tstLabels;
                     option = 'test';
             end
-            [c, w, e] = prediction(self, X, Y, lbls);
+            
             switch option
                 case 'test'
+                    [c, w, e] = prediction(self, X, Y, lbls);
                     self.error.test = cat(1,e,self.error.test);
+
+                    proportion = length(c) / length(w);
+                    fprintf('\tTest Set:\n');
+                    fprintf('\t      correct:\t%d\n',length(c));
+                    fprintf('\t\twrong:\t%d\n',length(w));
+                    fprintf('\t\tratio:\t%0.2f\n',proportion);
                 case 'validation'
+                    [c, w, e] = prediction(self, X, Y, lbls);
                     self.error.validation = cat(1,e,self.error.validation);
+                    
+                    proportion = length(c) / length(w);
+                    fprintf('\tCross Validation:\n');
+                    fprintf('\t      correct:\t%d\n',length(c));
+                    fprintf('\t\twrong:\t%d\n',length(w));
+                    fprintf('\t\tratio:\t%0.2f\n',proportion);
                 otherwise
                     disp('ERROR: no type chosen for test/validation');
             end
-                     
-            proportion = length(c) / length(w);
-            
-            fprintf('\t      correct:\t%d\n',length(c));
-            fprintf('\t\twrong:\t%d\n',length(w));
-            fprintf('\t\tratio:\t%0.2f\n',proportion);
          end
         
         % executes training cycles
