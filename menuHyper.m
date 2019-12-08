@@ -1,7 +1,6 @@
 function [] = menuHyper(self)
 %menuHyper lets the user change hyperparameter options
 %
-%
 
 fprintf('\n* * * * * * * * * * * * * * *\n');
 fprintf(  '*  Hyper Parameter Tuning   *');
@@ -256,11 +255,33 @@ switch self.transfer
                 (2/sqrt(length(self.weights{i})));
         end
     case 'tanh'
+        % works best with tanh
         for i = 1:length(self.weights)
             fprintf('Re-establishing network weights...'\n);
             fprintf('Tanh work best using Xavier initialization.\n');
             self.weights{i} = randn(size(self.weights{i})) *...
                 (1/sqrt(length(self.weights{i})));
+        end
+    otherwise
+        layers = [];
+        for i = 1:length(self.weights)
+            [out, in] = size(self.weights{i});
+            if i == 1
+                layers = [in out];
+            else
+                layers = cat(2,layers,out);
+            end
+        end
+        for i = 1:(length(layers)-1)
+            H1 = double(layers(i));
+            if i == 1
+                H2 = double(H1);
+            else
+                H2 = double(layers(i-1));
+            end
+            b = sqrt(6.0) / sqrt(H1 + H2);
+            self.weights{i} = -b + (2*b)*rand([layers(i+1) layers(i)]);
+            self.bias(i) = 1;
         end
 end
 

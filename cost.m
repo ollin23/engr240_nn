@@ -46,7 +46,7 @@ switch self.costFunction
     case 'kl'
         if derivative
             % tentative, not actual derivative
-            J = target - prediction;
+            J = sum(log(predict ./ target) +1);
         else
             J = sum(prediction .* log(prediction ./ target));
         end

@@ -4,7 +4,7 @@ function splitData(self, trainSize, valSize, testSize)
 %non-overlapping sets
 %
 %EXAMPLE:
-%split(.7, .2, .1);
+% split(.7, .2, .1);
 %
 %PARAMETERS
 % data : the dataset to split

@@ -24,6 +24,27 @@ function fit2(self)
         % start timer
         tic;
         % train the network
+        if epoch == 1
+            if  self.optim.ridge
+                ridgeTrigger = true;
+                self.optim.ridge = false;
+            else
+                ridgeTrigger = false;
+            end
+            if self.optim.lasso
+                lassoTrigger = true;
+                self.optim.none = false;
+            else
+                lassoTrigger = false;
+            end
+        end
+        if mod(epoch,self.threshold) == 0 && ridgeTrigger == true
+            self.optim.ridge = true;
+        end
+        if mod(epoch,self.threshold) == 0 && lassoTrigger == true
+            self.optim.lasso = true;
+        end 
+        
         if self.optim.parallel || self.optim.GPU
             [err, acc, prec, recall, R2] = accelTrain(self);
         else
@@ -64,7 +85,7 @@ function fit2(self)
                 trainingSummary(self, epochTime,ep,true);
             end
         else
-            if mod(ep,20) == 0
+            if mod(ep,15) == 0
                 trainingSummary(self,epochTime,ep,true);
             end
         end
@@ -73,15 +94,24 @@ function fit2(self)
         % 2% change in error in the wrong direction
         %threshold = self.epochs * .05;
         if self.optim.early && epoch >= 15
+            fprintf('epoch : %d\',epoch);
             %errAvg = sum(self.errors(end-threshold:end))/threshold;
-            if err > 1.02*min(self.errors)
+            if err > 1.02*min(self.errors) || isnan(err)
                 break;
             end
         end
+        
+        % shuffle every 10 epochs
+        if mod(epoch, 10) == 0
+            self.shuffle('training');
+        end
+        
+        
      end % end epoch
 
     % end of trial training summary
     trainingSummary(self, epochTime, ep, false);
+
     
     function epochSummary(err, acc, prec, R2)
         fprintf('\tError :\t\t%8.5f\n',err);

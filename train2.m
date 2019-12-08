@@ -6,8 +6,8 @@ function [err, acc, prec, rec, R2] = train2(self)
     [sampleSize,~] = size(self.images.training);
 
     % determine batch size
-    % self.batches == 0, then batchSize == 1 , Stochastic Gradient Descent
-    % self.batches == 1, batchSize == 1000, Batch Gradient Descent
+    % self.batches == 0, then batchSize == 1000 , Batch Gradient Descent
+    % self.batches == 1, Stochastic Gradient Descent
     if self.batches == 0
         batchSize = 1000;
     elseif self.batches > sampleSize

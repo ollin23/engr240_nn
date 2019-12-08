@@ -113,7 +113,7 @@ classdef Network < handle
         end
 
         % prediction function
-         function predict(self, option)
+        function predict(self, option)
          %predict predicts results based on the trained model
          %
          % Example :
@@ -282,6 +282,56 @@ classdef Network < handle
             splitData(self, trainSize, valSize, testSize);
         end
 
+        function shuffle(self, varargin)
+            vars = cellstr(varargin);
+
+            if nargin > 1
+                % test data
+                if any(strcmpi(vars,'test'))
+                    data = self.images.test;
+                    lbls = self.images.tstLabels;
+                    encoded = self.images.tstEncLabels;
+
+                    trainMask = randperm(size(data,1));
+                    data = data(trainMask,:);
+                    lbls = lbls(trainMask);
+                    encoded = encoded(trainMask,:);
+
+                    self.images.test = data;
+                    self.images.tstLabels = lbls;
+                    self.images.tstEncLabels = encoded;
+                end
+                if any(strcmpi(vars,'validation'))
+                    data = self.images.val;
+                    lbls = self.images.valLabels;
+                    encoded = self.images.valEncLabels;
+
+                    trainMask = randperm(size(data,1));
+                    data = data(trainMask,:);
+                    lbls = lbls(trainMask);
+                    encoded = encoded(trainMask,:);
+
+                    self.images.val = data;
+                    self.images.valLabels = lbls;
+                    self.images.valEncLabels = encoded;
+                end
+                if any(strcmpi(vars,'training'))
+                    data = self.images.training;
+                    lbls = self.images.tngLabels;
+                    encoded = self.images.tngEncLabels;
+
+                    trainMask = randperm(size(data,1));
+                    data = data(trainMask,:);
+                    lbls = lbls(trainMask);
+                    encoded = encoded(trainMask,:);
+
+                    self.images.training = data;
+                    self.images.tngLabels = lbls;
+                    self.images.tngEncLabels = encoded;
+                end
+            end
+        end
+        
         % generate a report with elapsed time
         function report(self, epochTime, ep, backup)
         % generate a report with the time elapsed recorded
@@ -436,26 +486,44 @@ classdef Network < handle
         switch nargin
             case 2
                 if (change == true)
-                    layers = [];
-                    for i = 1:length(self.weights)
-                        [out, in] = size(self.weights{i});
-                        if i == 1
-                            layers = [in out];
-                        else
-                            layers = cat(2,layers,out);
-                        end
-                    end
+                    switch self.transfer
+                        case {'relu', 'leaky'}
+                            fprintf('Re-establishing network weights:\n');
+                            fprintf('ReLU and Leaky ReLU work best using Golorot initialization.\n');
 
-                    for i = 1:(length(layers)-1)
-                        H1 = double(layers(i));
-                        if i == 1
-                            H2 = double(H1);
-                        else
-                            H2 = double(layers(i-1));
-                        end
-                        b = sqrt(6.0) / sqrt(H1 + H2);
-                        self.weights{i} = -b + (2*b)*rand([layers(i+1) layers(i)]);
-                        self.bias(i) = 1;
+                            for i = 1:length(self.weights)
+                                self.weights{i} = randn(size(self.weights{i})) *...
+                                    (2/sqrt(length(self.weights{i})));
+                            end
+                        case 'tanh'
+                            % works best with tanh
+                            for i = 1:length(self.weights)
+                                fprintf('Re-establishing network weights...'\n);
+                                fprintf('Tanh work best using Xavier initialization.\n');
+                                self.weights{i} = randn(size(self.weights{i})) *...
+                                    (1/sqrt(length(self.weights{i})));
+                            end
+                        otherwise
+                            layers = [];
+                            for i = 1:length(self.weights)
+                                [out, in] = size(self.weights{i});
+                                if i == 1
+                                    layers = [in out];
+                                else
+                                    layers = cat(2,layers,out);
+                                end
+                            end
+                            for i = 1:(length(layers)-1)
+                                H1 = double(layers(i));
+                                if i == 1
+                                    H2 = double(H1);
+                                else
+                                    H2 = double(layers(i-1));
+                                end
+                                b = sqrt(6.0) / sqrt(H1 + H2);
+                                self.weights{i} = -b + (2*b)*rand([layers(i+1) layers(i)]);
+                                self.bias(i) = 1;
+                            end
                     end
                 else
                     self.weights = self.backupWeights;
