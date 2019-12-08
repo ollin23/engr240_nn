@@ -23,36 +23,36 @@ function fit2(self)
         
         % start timer
         tic;
+        
         % train the network
-        if epoch == 1
-            if  self.optim.ridge
+        if epoch == 1 && self.optim.ridge
                 ridgeTrigger = true;
                 self.optim.ridge = false;
             else
                 ridgeTrigger = false;
-            end
-            if self.optim.lasso
+        end
+        if epoch == 1 && self.optim.lasso
                 lassoTrigger = true;
                 self.optim.none = false;
             else
                 lassoTrigger = false;
-            end
         end
-        if mod(epoch,self.threshold) == 0 && ridgeTrigger == true
-            self.optim.ridge = true;
+        
+        if (mod(epoch,self.threshold) == 0) && ridgeTrigger == true
+                self.optim.ridge = true;
         end
         if mod(epoch,self.threshold) == 0 && lassoTrigger == true
-            self.optim.lasso = true;
+                self.optim.lasso = true;
         end 
-        
+
         if self.optim.parallel || self.optim.GPU
-            [err, acc, prec, recall, R2] = accelTrain(self);
+                [err, acc, prec, recall, R2] = accelTrain(self);
         else
-            [err, acc, prec, recall, R2] = train2(self);
+                [err, acc, prec, recall, R2] = train2(self);
         end
+        
         self.stop = toc;
 
-        
         epochSummary(err, acc, prec, R2);
         self.predict('validation');
         self.predict('test');

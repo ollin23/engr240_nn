@@ -27,10 +27,13 @@ for layer = layers:-1:1
         end
     end
 %     fprintf('layers %d\n',layer);
-%     fprintf('size(gradient) = %d %d\n',size(gradient));
-%     fprintf('size(a) = %d %d\n',size(a));
-    
-    delta = gradient' * a;
+%      fprintf('size(gradient) = %d %d\n',size(gradient));
+%      fprintf('size(a) = %d %d\n',size(a));
+    try
+        delta = gradient' * a;
+    catch
+        delta = gradient * a;
+    end
     deltaBias = mean(mean(gradient') * self.bias(layer));
     
     % * * * * * * * * * * * * * * * * 
