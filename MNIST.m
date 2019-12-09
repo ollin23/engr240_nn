@@ -40,7 +40,7 @@ for i = 1:step:rows
     imagesc(reshape(images(i,:),sz,sz)'),...
         title(['Target Label: ',num2str(labels(i)),...
         '   (Press any button to continue)'])
-    %pause();
+    pause();
 end
 
 %normalize image data
