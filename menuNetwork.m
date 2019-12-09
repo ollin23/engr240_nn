@@ -52,7 +52,7 @@ function [net] = menuNetwork(labels, images)
     net.labels = labels;
 
     %randomize images
-    [r,~] = size(net.images);
+    [r,~] = size(net.imageData);
     shuffledIndex = randperm(r);
     net.imageData(1:end,:) = net.imageData(shuffledIndex,:); 
 end
