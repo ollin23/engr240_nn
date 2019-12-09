@@ -1,13 +1,10 @@
 # engr240_nn
 MATLAB based MLP
 This is the project for my Engineering Applications class for Fall 2019.
-Last update: 3 Dec 2019
+Last update: 9 Dec 2019
 
-UPDATE, 3 Dec 2019
-- added prediction function
-- improvements to auto-generated reports
-- improvements to Network object
-- improvements to report plots
+UPDATE, 9 Dec 2019
+- removed ProjectMain, replaced with BOILERPLATE.m
 
 BOILERPLATE WORKFLOW<br/>
 <pre>
@@ -15,11 +12,28 @@ BOILERPLATE WORKFLOW<br/>
    data = load(dd);                        % Step 2: load data into memory
    [labels, images] = MNIST(data);         % Step 3: separate images and labels
    network = buildNetwork(labels, images); % Step 4: build network
-   menuHyper(network);                     % Step 5: set hyperparameters for this session
-   network.split(.7,.2,.1);                % Step 6: split data into training, validation, and
+   network.split(.7,.2,.1);                % Step 5: split data into training, validation, and
                                            %         test sets
                                            %         Example: for 100 samples split 70 for training,
                                            %         20 for validation, and 10 for testing
+   % Step 6: adjust hyperparameters
+   % menuHyper(network)
+   network.eta = 1e-5;
+   network.epochs = 25;
+   network.batches = 1; % stochastic gradient descent
+   net.lambda = .1;
+   net.mu = .5;
+   net.transfer = 'leaky';
+   ne.lastLayer = 'softmax';
+   net.costFunction = 'cross';
+   net.optim.none = false;
+   net.optim.lasso = false;
+   net.optim.ridge = true;
+   net.optim.momentum = true;
+   net.optim.dropout = false;
+   net.droprate = .85;
+   net.optim.early = false;
+                                           
    % NOTE: enter false if using non-nVidia GPU                                        
    network.fit(false);                     % Step 7: train the network, no GPU/parallelism applied
    network.predict('test');                % Step 8: run the test data
@@ -68,6 +82,13 @@ Files
 - train: trains the neural net
 - update: update the weights and biases
 - fit: replaced by fit2
+- ProjectMain: replaced with BOILERPLATE
+
+Notes, 3 Dec 2019
+- added prediction function
+- improvements to auto-generated reports
+- improvements to Network object
+- improvements to report plots
 
 Notes, 16 Nov 2019:
 - Network: updated reporting, added split function
