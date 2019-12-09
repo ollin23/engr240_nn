@@ -1,4 +1,4 @@
-function [net] = menuNetwork(images, labels)
+function [net] = menuNetwork(labels, images)
 %menuNetwork provides the interface to create a new MLP
 %
 %PARAMETERS
