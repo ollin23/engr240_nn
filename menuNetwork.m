@@ -48,11 +48,11 @@ function [net] = menuNetwork(labels, images)
     % encode the labels
     % add network metric parameters
     net.encodedLabels = oneHotEncoding(labels);
-    net.images = images;
+    net.imageData = images;
     net.labels = labels;
 
     %randomize images
     [r,~] = size(net.images);
     shuffledIndex = randperm(r);
-    net.images(1:end,:) = net.images(shuffledIndex,:); 
+    net.imageData(1:end,:) = net.imageData(shuffledIndex,:); 
 end
