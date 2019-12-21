@@ -21,11 +21,15 @@ function [encoded] = oneHotEncoding(labelList)
 targets = unique(labelList);
 % generate the one-hot matrix
 targetMatrix = eye(length(targets));
+[r,~] = size(labelList);
+
+% allocate memory for encoded structure
+encoded = zeros(r,length(targets));
 
 % encode each label; 0 takes the 10th digit
-for i = 1:length(labelList)
+for i = 1:r
     if labelList(i) == 0
-        encoded(i,:) = targetMatrix(10,:);
+        encoded(i,:) = targetMatrix(end,:);
     else
         encoded(i,:) = targetMatrix(labelList(i),:);
     end
