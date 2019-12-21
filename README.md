@@ -11,7 +11,7 @@ Took some time off and reconceived the net.
 BOILERPLATE WORKFLOW<br/>
 <pre>
 % Step 1: choose training data
-   dd = firstMenu();
+   dd = dataSelect();
    
 % Step 2: load data into memory
    raw = load(dd);
