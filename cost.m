@@ -60,28 +60,28 @@ end
 
 
 % regularization
-if (self.optim.none == false)
-    if self.optim.lasso
-        L1norm = 0;
-        for w = 1:length(self.weights)
-            L1norm = L1norm + norm(self.weights{w});
-        end
-        J = J + ...
-            (self.lambda / numel(self.weights)) * ...
-            L1norm;
-            % sum(cellfun(@(x)sum(x(:)),self.weights));
-    end
-    if self.optim.ridge
-        L2norm = 0;
-        for w = 1:length(self.weights)
-            L2norm = L2norm + norm(self.weights{w}.^2);
-        end
-        J = J + ...
-            (self.lambda / length(self.labels)) * ...
-            L2norm;
-            % sum(cellfun(@(x)sum(x(:).^2),self.weights));
-    end
-end
+%if (self.optim.none == false)
+%    if self.optim.lasso
+%        L1norm = 0;
+%        for w = 1:length(self.weights)
+%            L1norm = L1norm + norm(self.weights{w});
+%        end
+%        J = J + ...
+%            (self.lambda / numel(self.weights)) * ...
+%            L1norm;
+%            % sum(cellfun(@(x)sum(x(:)),self.weights));
+%    end
+%    if self.optim.ridge
+%        L2norm = 0;
+%        for w = 1:length(self.weights)
+%            L2norm = L2norm + norm(self.weights{w}.^2);
+%        end
+%        J = J + ...
+%            (self.lambda / length(self.labels)) * ...
+%            L2norm;
+%            % sum(cellfun(@(x)sum(x(:).^2),self.weights));
+%    end
+%end
 
 
 end
