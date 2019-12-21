@@ -28,13 +28,26 @@ function [J] = cost(self, prediction, target, derivative)
 %   boolean value; determines if the cost derivative should be used
 %
 
+% fprintf('size(target) : %d %d\n',size(target));
+% fprintf('size(prediction) : %d %d\n',size(prediction));
+
 switch self.costFunction
-    case 'cross'
+    case 'sparse_cross'
         if derivative
-            J = (target./prediction) + (1-target)/(1-prediction);
-            J = -J;
+            J = prediction - target;
         else
             J = -sum(target .* log(prediction));
+            J =  J  / size(target,1);
+        end
+    case 'cross'
+        if derivative
+            % tentative
+            J = target - prediction;
+
+        else
+            %J = -sum(target .* log(prediction));
+            J = target .* log(prediction) + (1-target) .* log(1-prediction);
+            J = -J / length(target);
         end
     case 'hinge'
         if derivative
@@ -52,36 +65,32 @@ switch self.costFunction
         end
     case 'mse'
         if derivative
-            J = target - prediction;
+            J = (target - prediction) / length(target);
         else
             J = .5*sum((target - prediction).^2);
         end
 end
-
-
+ 
 % regularization
-%if (self.optim.none == false)
-%    if self.optim.lasso
-%        L1norm = 0;
-%        for w = 1:length(self.weights)
-%            L1norm = L1norm + norm(self.weights{w});
-%        end
-%        J = J + ...
-%            (self.lambda / numel(self.weights)) * ...
-%            L1norm;
-%            % sum(cellfun(@(x)sum(x(:)),self.weights));
-%    end
-%    if self.optim.ridge
-%        L2norm = 0;
-%        for w = 1:length(self.weights)
-%            L2norm = L2norm + norm(self.weights{w}.^2);
-%        end
-%        J = J + ...
-%            (self.lambda / length(self.labels)) * ...
-%            L2norm;
-%            % sum(cellfun(@(x)sum(x(:).^2),self.weights));
-%    end
-%end
+if ~(self.options.none)
+    L1Norm = 0;
+    L2Norm = 0;
+    fn = fieldnames(self.layers);
+    for k = 1:numel(fn)
+        if self.options.ridge
+            L2Norm= L2Norm + ...
+                self.lambda * ...
+                sum(sum(self.layers.(fn{k}).weights .^2));
+        end
+        if self.options.lasso
+            L1Norm = ...
+                self.lambda *...
+                abs(sum(sum(self.layers.(fn{k}).weights)));
+        end
+    end
+    
+    J = J + L1Norm + L2Norm;
 
+end
 
 end

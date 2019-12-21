@@ -11,6 +11,7 @@ function [a] = softmax(h)
 %     labeled data
 
     ex = exp(h - max(h));
-    a = ex / sum(exp(ex));
+    a = ex ./ sum(exp(ex));
+    %a = exp(h) ./ sum(exp(h));
 
 end
