@@ -11,20 +11,20 @@ BOILERPLATE WORKFLOW<br/>
    dd = firstMenu();                       % Step 1: choose training data
    data = load(dd);                        % Step 2: load data into memory
    [labels, images] = MNIST(data);         % Step 3: separate images and labels
-   network = buildNetwork(labels, images); % Step 4: build network
-   network.split(.7,.2,.1);                % Step 5: split data into training, validation, and
+   net = buildNetwork(labels, images); % Step 4: build network
+   net.split(.7,.2,.1);                % Step 5: split data into training, validation, and
                                            %         test sets
                                            %         Example: for 100 samples split 70 for training,
                                            %         20 for validation, and 10 for testing
    % Step 6: adjust hyperparameters
    % menuHyper(network)
-   network.eta = 1e-5;
-   network.epochs = 25;
-   network.batches = 1; % stochastic gradient descent
+   net.eta = 1e-5;
+   net.epochs = 25;
+   net.batches = 1; % stochastic gradient descent
    net.lambda = .1;
    net.mu = .5;
    net.transfer = 'leaky';
-   ne.lastLayer = 'softmax';
+   net.lastLayer = 'softmax';
    net.costFunction = 'cross';
    net.optim.none = false;
    net.optim.lasso = false;
