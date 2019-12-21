@@ -1,88 +1,86 @@
 # engr240_nn
 MATLAB based MLP
-This is the project for my Engineering Applications class for Fall 2019.
-Last update: 9 Dec 2019
+Last update: 20 Dec 2019
 
-UPDATE, 9 Dec 2019
-- removed ProjectMain, replaced with BOILERPLATE.m
+Project for my Engineering Applications class for Fall 2019... OVERHAULED
+Based on the way we designed the original net, some technical debt accrued
+
+UPDATE, 20 Dec 2019
+Took some time off and reconceived the net.
 
 BOILERPLATE WORKFLOW<br/>
 <pre>
-   dd = firstMenu();                       % Step 1: choose training data
-   data = load(dd);                        % Step 2: load data into memory
-   [labels, images] = MNIST(data);         % Step 3: separate images and labels
-   network = buildNetwork(labels, images); % Step 4: build network
-   network.split(.7,.2,.1);                % Step 5: split data into training, validation, and
-                                           %         test sets
-                                           %         Example: for 100 samples split 70 for training,
-                                           %         20 for validation, and 10 for testing
-   % Step 6: adjust hyperparameters
-   % menuHyper(network)
-   network.eta = 1e-5;
-   network.epochs = 25;
-   network.batches = 1; % stochastic gradient descent
-   net.lambda = .1;
-   net.mu = .5;
-   net.transfer = 'leaky';
-   ne.lastLayer = 'softmax';
-   net.costFunction = 'cross';
-   net.optim.none = false;
-   net.optim.lasso = false;
-   net.optim.ridge = true;
-   net.optim.momentum = true;
-   net.optim.dropout = false;
+% Step 1: choose training data
+   dd = firstMenu();
+   
+% Step 2: load data into memory
+   raw = load(dd);
+
+% Step 3: separate images and labels
+   [labels, images] = MNIST(raw);
+
+% Step 4: build network
+   net = network(784, 64, 10);
+   
+% Step 5: split data into training, validation, and test sets
+%         Example: for 100 samples split 70 for training,
+%                  20 for validation, and 10 for testing
+   data =shuffle(labels, images, .7,.2,.1);  
+
+% Step 6: adjust hyperparameters
+   net.eta = 1e-5;                           
+   net.epochs = 250;
+   net.batchSize = 100;
+   net.lambda = 1e-15;
+   net.mu = .9;
    net.droprate = .85;
-   net.optim.early = false;
-                                           
-   % NOTE: enter false if using non-nVidia GPU                                        
-   network.fit(false);                     % Step 7: train the network, no GPU/parallelism applied
-   network.predict('test');                % Step 8: run the test data
-   % Step 9: save and name the model
-   % Step 10: choose to run again, changing hyperparameters
+   net.costFunction = 'sparse_cross';
+   
+   net.options.none = false;
+   net.options.lasso = false;
+   net.options.ridge = true;
+   net.options.momentum = true;
+   net.options.dropout = false;
+   net.options.GPU = false;
+   net.options.adam = false;
+   net.options.early = false;
+   
+% Step 7: train the network
+   train(net, data.training.samples, data.training.labels);                    
+
+% Step 8: run the test data
+% not implemented yet
+
+% Step 9: save and name the model
+% Step 10: run again, changing hyperparameters as desired
 </pre>
    
 Functions:
-- accelTrain: implements GPU processing
 - activate: activation functions
-- backprop2: backpropagation algorithm
-- buildNetwork: interface to generate an MLP
 - cost: cost functions
-- createNetwork: initializes the neural net
-- displayNetworkDesign: allows user to numerically see how the network is designed
-- feedforward2: feedforward algorithm
-- firstMenu: choice of which dataset to use
-- fit2: wrapper function for training data; implements epoch cycles and graph
-- menu: menu to drive topology design
-- menuHyper: menu to drive hyperpamater tuning
+- dataSelect: choice of which dataset to use
 - metrics: calculate metrics
 - normalize: normalizes data
 - oneHotEncoding: encodes input data
 - MNIST: splits the csv into label and image structures; shows user a sample of the images
-- prediction: predicts results based on model
 - sigmoid: sigmoid function
 - softmax: softmax function
-- splitData: splits data into training, validation, and testing sets
-- train2: trains the network, gathers loss and accuracy metrics
+- shuffle: splits data into training, validation, and testing sets
 - trainingSummary: generates a training report
-- update2: updates network parameters
 
 Objects
 - Network: the neural network object
 
 Main Programs
 - GetAndConvertFiles: downloads and converts binary MNIST files to csv into "projects" subfolder of the current directory
-- ProjectMain: the main project file
 
 
 
 ARCHIVE
-Files
-- backprop: backprop algorithm
-- feedforward: simple feedforward process(weights * input + data)
-- train: trains the neural net
-- update: update the weights and biases
-- fit: replaced by fit2
-- ProjectMain: replaced with BOILERPLATE
+
+
+Notes, 9 Dec 2019
+- removed ProjectMain, replaced with BOILERPLATE.m
 
 Notes, 3 Dec 2019
 - added prediction function
