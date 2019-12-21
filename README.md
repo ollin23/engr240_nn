@@ -3,10 +3,16 @@ MATLAB based MLP
 Last update: 20 Dec 2019
 
 Project for my Engineering Applications class for Fall 2019... OVERHAULED
-Based on the way we designed the original net, some technical debt accrued
 
 UPDATE, 20 Dec 2019
-Took some time off and reconceived the net.
+Took some time off and reconceived the net. Based on the way we designed the
+original net some technical debt accrued which precluded a more extensible
+and expandable meta-architecture (framework). The current framework allows
+for easy extension to include convolutional layers, pooling layers, LSTM,
+and other types by modularlizing layer creation. I may update this as a matter
+of principle to keep fresh with MATLAB, but future efforts will be in
+replicating this work via Julia.
+
 
 BOILERPLATE WORKFLOW<br/>
 <pre>
