@@ -10,8 +10,8 @@ function [accuracy, precision, recall, R2] = metrics(prediction, target, ybar)
         FP = nnz(diff<0);
         FN = nnz(diff>0);
         TN = sum(p == diff);
-        %TP = sum(p == target);
-        TP = abs(1-FN);
+        TP = sum(p == target);
+        %TP = abs(1-FN);
     else
         FP = 0;
         TP = 0;
