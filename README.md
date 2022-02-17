@@ -1,6 +1,10 @@
 # engr240_nn
-MATLAB based MLP
-This is the project for my Engineering Applications class for Fall 2019.
+MATLAB based MLP.<p>
+This is the project for my Applied Numerical Methods engineering class for Fall 2019. The idea
+   was to build a multi-layer perceptron from scratch. The excessive function files were to meet
+   a minimum criteria for the course. The project was not made to be efficient, but to explore
+   as much as possible during a quarter long course. Not all intended features were implemented,
+   but the final project is functional enough.
 Last update: 9 Dec 2019
 
 UPDATE, 9 Dec 2019
